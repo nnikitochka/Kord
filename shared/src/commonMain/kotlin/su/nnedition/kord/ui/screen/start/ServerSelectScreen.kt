@@ -55,13 +55,16 @@ import kord.shared.generated.resources.visibility_off
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import co.touchlab.kermit.Logger
 import su.nnedition.kord.service.AuthService
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
-fun ServerSelectScreen() {
+fun ServerSelectScreen(
+    onLoginSuccess: () -> Unit = {}
+) {
     var protocol by remember { mutableStateOf("https://") }
     var protocolExpanded by remember { mutableStateOf(false) }
     val protocols = listOf("https://", "http://")
@@ -71,9 +74,13 @@ fun ServerSelectScreen() {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    var isConnecting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     var pingState by remember { mutableStateOf(ServerPingState.IDLE) }
     val coroutineScope = rememberCoroutineScope()
     val authService = remember { AuthService.default }
+    val logger = remember { Logger.withTag("ServerSelectScreen") }
 
     LaunchedEffect(protocol, serverAddress) {
         val trimmed = serverAddress.trim()
@@ -155,6 +162,7 @@ fun ServerSelectScreen() {
                     OutlinedTextField(
                         value = serverAddress,
                         onValueChange = { input ->
+                            errorMessage = null
                             if (input.startsWith("https://", ignoreCase = true)) {
                                 protocol = "https://"
                                 serverAddress = input.substring(8)
@@ -203,7 +211,10 @@ fun ServerSelectScreen() {
 
                 OutlinedTextField(
                     value = username,
-                    onValueChange = { username = it },
+                    onValueChange = { 
+                        username = it
+                        errorMessage = null
+                    },
                     label = { Text("Пользователь") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -214,7 +225,10 @@ fun ServerSelectScreen() {
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { 
+                        password = it
+                        errorMessage = null
+                    },
                     label = { Text("Пароль") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -248,19 +262,53 @@ fun ServerSelectScreen() {
                         Button(
                             onClick = {
                                 val targetBase = "$protocol${serverAddress.trim()}".trimEnd('/')
+                                isConnecting = true
+                                errorMessage = null
+                                logger.i { "Нажата кнопка 'Подключиться': $targetBase для пользователя '$username'" }
                                 coroutineScope.launch {
-                                    authService.login(
-                                        baseUrl = targetBase,
-                                        username = username,
-                                        password = password
-                                    )
+                                    try {
+                                        val result = authService.login(
+                                            baseUrl = targetBase,
+                                            username = username,
+                                            password = password
+                                        )
+                                        result.onSuccess { session ->
+                                            logger.i { "Авторизация прошла успешно! Переход к главному экрану..." }
+                                            onLoginSuccess()
+                                        }.onFailure { ex ->
+                                            logger.e(ex) { "Ошибка входа: ${ex.message}" }
+                                            errorMessage = ex.message ?: "Ошибка авторизации"
+                                        }
+                                    } catch (t: Throwable) {
+                                        logger.e(t) { "Неожиданный сбой: ${t.message}" }
+                                        errorMessage = t.message ?: "Неожиданная ошибка"
+                                    } finally {
+                                        isConnecting = false
+                                    }
                                 }
                             },
-                            enabled = username.isNotBlank() && password.isNotBlank(),
-                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isConnecting && username.isNotBlank() && password.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Подключиться")
+                            if (isConnecting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                            } else {
+                                Text("Подключиться")
+                            }
+                        }
+
+                        if (errorMessage != null) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = errorMessage ?: "",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
                     }
                 }

@@ -61,7 +61,9 @@ kotlin {
             api(libs.multiplatform.settings.no.arg)
             api(libs.multiplatform.settings.serialization)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
             implementation(libs.ktor.http)
+            api(libs.kermit)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
