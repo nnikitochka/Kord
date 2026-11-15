@@ -24,13 +24,14 @@ import androidx.compose.ui.unit.dp
 import su.nnedition.kord.ui.component.page.CollectionsPage
 import su.nnedition.kord.ui.component.page.HomePage
 import su.nnedition.kord.ui.component.page.Page
+import su.nnedition.kord.ui.component.page.PlaylistsPage
 import su.nnedition.kord.ui.component.page.SearchPage
 import su.nnedition.kord.ui.component.page.SettingsPage
 
 @Composable
 @Preview
 fun MainViewScreen(
-    topPages: List<Page> = listOf(HomePage, SearchPage, CollectionsPage),
+    topPages: List<Page> = listOf(HomePage, SearchPage, PlaylistsPage, CollectionsPage),
     bottomPages: List<Page> = listOf(SettingsPage)
 ) {
     var selectedPage by remember { mutableStateOf(topPages.firstOrNull() ?: HomePage) }

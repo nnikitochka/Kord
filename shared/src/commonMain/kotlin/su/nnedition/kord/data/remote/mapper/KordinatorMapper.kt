@@ -2,6 +2,7 @@ package su.nnedition.kord.data.remote.mapper
 
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.remote.ServerConfig
@@ -9,6 +10,8 @@ import su.nnedition.kord.data.remote.dto.AlbumDetailDto
 import su.nnedition.kord.data.remote.dto.AlbumDto
 import su.nnedition.kord.data.remote.dto.ArtistDetailDto
 import su.nnedition.kord.data.remote.dto.ArtistDto
+import su.nnedition.kord.data.remote.dto.PlaylistDetailDto
+import su.nnedition.kord.data.remote.dto.PlaylistDto
 import su.nnedition.kord.data.remote.dto.SearchResult3Dto
 import su.nnedition.kord.data.remote.dto.SongDto
 
@@ -90,6 +93,38 @@ class KordinatorMapper(
             artists = dto.artist.map { toArtist(it) },
             albums = dto.album.map { toAlbum(it) },
             tracks = dto.song.map { toTrack(it) }
+        )
+    }
+
+    fun toPlaylist(dto: PlaylistDto): Playlist {
+        return Playlist(
+            id = dto.id,
+            name = dto.name,
+            comment = dto.comment,
+            owner = dto.owner,
+            isPublic = dto.public ?: false,
+            songCount = dto.songCount ?: 0,
+            durationSeconds = dto.duration?.toLong() ?: 0L,
+            created = dto.created,
+            changed = dto.changed,
+            coverArtUrl = dto.coverArt?.let { getCoverArtUrl(it) },
+            tracks = emptyList()
+        )
+    }
+
+    fun toPlaylist(dto: PlaylistDetailDto): Playlist {
+        return Playlist(
+            id = dto.id,
+            name = dto.name,
+            comment = dto.comment,
+            owner = dto.owner,
+            isPublic = dto.public ?: false,
+            songCount = dto.songCount ?: dto.entry.size,
+            durationSeconds = dto.duration?.toLong() ?: dto.entry.sumOf { it.duration ?: 0L },
+            created = dto.created,
+            changed = dto.changed,
+            coverArtUrl = dto.coverArt?.let { getCoverArtUrl(it) },
+            tracks = dto.entry.map { toTrack(it) }
         )
     }
 

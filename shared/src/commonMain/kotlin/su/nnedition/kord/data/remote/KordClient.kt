@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.AlbumListType
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.remote.dto.KordinatorResponseDto
@@ -219,6 +220,27 @@ class KordClient(
         response.searchResult3?.let { mapper.toSearchResult(it) } ?: SearchResult()
     }.onFailure { error ->
         logger.e(error) { "Ошибка при поиске '$query': ${error.message}" }
+    }
+
+    suspend fun getPlaylists(): Result<List<Playlist>> = runCatching {
+        val response = executeKordinatorRequest("getPlaylists").getOrThrow()
+        response.playlists?.playlist?.map { mapper.toPlaylist(it) } ?: emptyList()
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка при получении плейлистов: ${error.message}" }
+    }
+
+    suspend fun getPlaylist(id: String): Result<Playlist> = runCatching {
+        val response = executeKordinatorRequest("getPlaylist", mapOf("id" to id)).getOrThrow()
+        response.playlist?.let { mapper.toPlaylist(it) } ?: error("Плейлист с id=$id не найден")
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка при получении плейлиста id=$id: ${error.message}" }
+    }
+
+    suspend fun createPlaylist(name: String): Result<Unit> = runCatching {
+        executeKordinatorRequest("createPlaylist", mapOf("name" to name)).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка при создании плейлиста '$name': ${error.message}" }
     }
 
     private fun extractErrorMessage(body: String): String? {
