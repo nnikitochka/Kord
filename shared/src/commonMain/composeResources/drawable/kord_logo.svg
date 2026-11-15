@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="kord_logo.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="2"
+     inkscape:cx="286.5"
+     inkscape:cy="494.25"
+     inkscape:window-width="1477"
+     inkscape:window-height="858"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <rect
+       x="432.73411"
+       y="347.66672"
+       width="166.4362"
+       height="279.24295"
+       id="rect4" />
+    <rect
+       x="445.67915"
+       y="375.40609"
+       width="220.06564"
+       height="318.07807"
+       id="rect3" />
+  </defs>
+  <g
+     inkscape:label="Слой 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#ffcc00;stroke-width:0.264583"
+       d="M 25.602624,262.94587 V 132.1649 20.758884"
+       id="path2" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text3"
+       style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#ffcc00" />
+    <path
+       style="fill:#ffcc00;stroke-width:0.264583"
+       d="m 84.5,165 h 4 c 0,0 0.749827,-9.99515 1,-15 0.249758,-4.99654 0.5,-9.99722 0.5,-15 0,-5.00278 -0.250242,-10.00346 -0.5,-15 -0.250173,-5.00485 -1,-15 -1,-15 h -4 c 0,0 0.749827,9.99515 1,15 0.249758,4.99654 0.5,9.99722 0.5,15 0,5.00278 -0.250242,10.00346 -0.5,15 -0.250173,5.00485 -1,15 -1,15 z"
+       id="path4"
+       sodipodi:nodetypes="ccsssccsssc" />
+    <path
+       style="fill:#ffcc00;stroke-width:0.264583"
+       d="m 89.950664,135.01145 13.779156,-7.55099 6.60543,-8.07331 3.30272,-7.82867 0.48929,-5.74917 h -2.72168 l -0.43204,5.51021 -2.8976,6.78988 -5.79519,7.00612 -12.339262,5.49866 z"
+       id="path5"
+       sodipodi:nodetypes="ccccccccccc" />
+  </g>
+</svg>

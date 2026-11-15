@@ -1,0 +1,247 @@
+package su.nnedition.kord.ui.screen.start
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
+import su.nnedition.kord.data.remote.KordClient
+import su.nnedition.kord.data.remote.ServerConfig
+
+enum class ServerPingState {
+    IDLE,
+    CHECKING,
+    SUCCESS,
+    FAILED
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Preview
+fun ServerSelectScreen() {
+    var protocol by remember { mutableStateOf("https://") }
+    var protocolExpanded by remember { mutableStateOf(false) }
+    val protocols = listOf("https://", "http://")
+
+    var serverAddress by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    var pingState by remember { mutableStateOf(ServerPingState.IDLE) }
+    val kordClient = remember { KordClient.default }
+
+    LaunchedEffect(protocol, serverAddress) {
+        val trimmed = serverAddress.trim()
+        if (trimmed.isEmpty()) {
+            pingState = ServerPingState.IDLE
+            return@LaunchedEffect
+        }
+
+        // Быстрый дебаунс при вводе
+        delay(250.milliseconds)
+
+        pingState = ServerPingState.CHECKING
+
+        val targetBase = "$protocol$trimmed".trimEnd('/')
+        val isReachable = kordClient.ping(targetBase)
+
+        pingState = if (isReachable) ServerPingState.SUCCESS else ServerPingState.FAILED
+    }
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier.padding(10.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 420.dp)
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Подключение к серверу",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ExposedDropdownMenuBox(
+                        expanded = protocolExpanded,
+                        onExpandedChange = { protocolExpanded = it },
+                        modifier = Modifier.width(120.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = protocol,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Протокол") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = protocolExpanded)
+                            },
+                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            singleLine = true
+                        )
+                        ExposedDropdownMenu(
+                            expanded = protocolExpanded,
+                            onDismissRequest = { protocolExpanded = false }
+                        ) {
+                            protocols.forEach { proto ->
+                                DropdownMenuItem(
+                                    text = { Text(proto) },
+                                    onClick = {
+                                        protocol = proto
+                                        protocolExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedTextField(
+                        value = serverAddress,
+                        onValueChange = { input ->
+                            if (input.startsWith("https://", ignoreCase = true)) {
+                                protocol = "https://"
+                                serverAddress = input.substring(8)
+                            } else if (input.startsWith("http://", ignoreCase = true)) {
+                                protocol = "http://"
+                                serverAddress = input.substring(7)
+                            } else {
+                                serverAddress = input
+                            }
+                        },
+                        label = { Text("Адрес сервера") },
+                        placeholder = { Text("your-server.com") },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                        trailingIcon = {
+                            when (pingState) {
+                                ServerPingState.CHECKING -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                ServerPingState.SUCCESS -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .background(Color(0xFF4CAF50), shape = CircleShape)
+                                    )
+                                }
+                                ServerPingState.FAILED -> {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .background(MaterialTheme.colorScheme.error, shape = CircleShape)
+                                    )
+                                }
+                                ServerPingState.IDLE -> {}
+                            }
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Username") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
+                )
+
+                AnimatedVisibility(
+                    visible = pingState == ServerPingState.SUCCESS,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 150)) +
+                            expandVertically(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing), expandFrom = Alignment.Top),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 100)) +
+                           shrinkVertically(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing), shrinkTowards = Alignment.Top),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                val targetBase = "$protocol${serverAddress.trim()}".trimEnd('/')
+                                kordClient.updateConfig(
+                                    ServerConfig(
+                                        baseUrl = targetBase,
+                                        username = username,
+                                        password = password
+                                    )
+                                )
+                            },
+                            enabled = username.isNotBlank() && password.isNotBlank(),
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Подключиться")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
