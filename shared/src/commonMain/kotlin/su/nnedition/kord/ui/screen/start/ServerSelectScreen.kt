@@ -209,7 +209,7 @@ fun ServerSelectScreen() {
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
+                    label = { Text("Пользователь") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp),
@@ -220,7 +220,7 @@ fun ServerSelectScreen() {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Password") },
+                    label = { Text("Пароль") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(64.dp),
