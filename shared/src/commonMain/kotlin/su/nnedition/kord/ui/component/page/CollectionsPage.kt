@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 object CollectionsPage : Page {
@@ -26,3 +27,10 @@ object CollectionsPage : Page {
         }
     }
 }
+
+@Preview
+@Composable
+private fun CollectionsPagePreview() {
+    CollectionsPage.Content(modifier = Modifier.fillMaxSize())
+}
+

@@ -1,17 +1,11 @@
-package su.nnedition.kord.ui.component.page
+package su.nnedition.kord.ui.component.page.playlist
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,11 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -48,22 +39,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.remote.KordClient
+import su.nnedition.kord.ui.component.page.Page
 
 object PlaylistsPage : Page {
     override val title: String = "Плейлисты"
     override val icon: ImageVector = Icons.AutoMirrored.Filled.PlaylistPlay
 
-    private val playlistGradients = listOf(
+    val playlistGradients = listOf(
         listOf(Color(0xFF6B46C1), Color(0xFF9F7AEA)), // Purple
         listOf(Color(0xFFDD6B20), Color(0xFFF6AD55)), // Orange
         listOf(Color(0xFFE53E3E), Color(0xFFFC8181)), // Red
@@ -160,7 +150,7 @@ object PlaylistsPage : Page {
                     selected = selectedFilter == PlaylistFilter.FAVORITES,
                     onClick = { selectedFilter = PlaylistFilter.FAVORITES },
                     label = { Text("Вам понравилось • $favoritesCount") },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -182,6 +172,7 @@ object PlaylistsPage : Page {
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
+
                 errorMessage != null -> {
                     Box(
                         modifier = Modifier
@@ -202,6 +193,7 @@ object PlaylistsPage : Page {
                         }
                     }
                 }
+
                 else -> {
                     val filteredPlaylists = when (selectedFilter) {
                         PlaylistFilter.CREATED -> playlists.filter { !it.isPublic }
@@ -303,99 +295,10 @@ object PlaylistsPage : Page {
             )
         }
     }
+}
 
-    @Composable
-    private fun NewPlaylistCard(onClick: () -> Unit) {
-        Column(
-            modifier = Modifier
-                .width(150.dp)
-                .clickable(onClick = onClick)
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Новый плейлист",
-                        modifier = Modifier.size(36.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Новый плейлист",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Normal,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-
-    @Composable
-    private fun PlaylistCard(
-        playlist: Playlist,
-        onClick: () -> Unit
-    ) {
-        val gradient = remember(playlist.id) {
-            val idx = (playlist.id.hashCode() and 0x7FFFFFFF) % playlistGradients.size
-            playlistGradients[idx]
-        }
-
-        Column(
-            modifier = Modifier
-                .width(150.dp)
-                .clickable(onClick = onClick)
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Brush.linearGradient(gradient)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp),
-                        tint = Color.White.copy(alpha = 0.9f)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = playlist.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${playlist.songCount} треков",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
+@Preview
+@Composable
+private fun PlaylistsPagePreview() {
+    PlaylistsPage.Content(modifier = Modifier.fillMaxSize())
 }
