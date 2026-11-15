@@ -48,6 +48,7 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.vlcj)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
