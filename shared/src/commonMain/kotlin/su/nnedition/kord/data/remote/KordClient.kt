@@ -26,7 +26,7 @@ class KordClient(
         val targetBase = (baseUrl ?: config.baseUrl).trim().trimEnd('/')
         if (targetBase.isEmpty()) return false
 
-        val pingUrl = "$targetBase/rest/ping.view?v=1.15.0&c=kord&f=json"
+        val pingUrl = "$targetBase/rest/ping?v=1.15.0&c=kord&f=json"
 
         return withTimeoutOrNull(4000L.milliseconds) {
             try {

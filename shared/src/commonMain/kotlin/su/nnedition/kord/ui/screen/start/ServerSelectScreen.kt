@@ -30,6 +30,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -43,8 +45,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kord.shared.generated.resources.Res
+import kord.shared.generated.resources.visibility
+import kord.shared.generated.resources.visibility_off
+import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 import su.nnedition.kord.data.remote.KordClient
@@ -68,6 +75,7 @@ fun ServerSelectScreen() {
     var serverAddress by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     var pingState by remember { mutableStateOf(ServerPingState.IDLE) }
     val kordClient = remember { KordClient.default }
@@ -128,7 +136,9 @@ fun ServerSelectScreen() {
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = protocolExpanded)
                             },
-                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .height(56.dp),
                             singleLine = true
                         )
                         ExposedDropdownMenu(
@@ -162,7 +172,9 @@ fun ServerSelectScreen() {
                         },
                         label = { Text("Адрес сервера") },
                         placeholder = { Text("your-server.com") },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(56.dp),
                         singleLine = true,
                         trailingIcon = {
                             when (pingState) {
@@ -198,7 +210,9 @@ fun ServerSelectScreen() {
                     value = username,
                     onValueChange = { username = it },
                     label = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -207,9 +221,23 @@ fun ServerSelectScreen() {
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation('*'),
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                painter = painterResource(
+                                    if (passwordVisible) Res.drawable.visibility_off else Res.drawable.visibility
+                                ),
+                                contentDescription = if (passwordVisible) "Скрыть пароль" else "Показать пароль",
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 )
 
                 AnimatedVisibility(
