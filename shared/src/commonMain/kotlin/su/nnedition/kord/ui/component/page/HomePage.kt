@@ -22,14 +22,13 @@ object HomePage : Page {
     @Composable
     override fun Content(modifier: Modifier) {
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(8.dp)
+            modifier = modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Text("Главная")
             }

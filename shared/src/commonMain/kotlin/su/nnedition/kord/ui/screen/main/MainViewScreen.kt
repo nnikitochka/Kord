@@ -22,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.ui.component.page.CollectionsPage
 import su.nnedition.kord.ui.component.page.HomePage
 import su.nnedition.kord.ui.component.page.Page
@@ -46,6 +48,12 @@ fun MainViewScreen(
     bottomPages: List<Page> = listOf(SettingsPage)
 ) {
     var selectedPage by remember { mutableStateOf(topPages.firstOrNull() ?: HomePage) }
+
+    LaunchedEffect(Unit) {
+        if (PlayerManager.instance.currentTrack.value == null) {
+            PlayerManager.restoreQueue()
+        }
+    }
 
     Row(
         modifier = Modifier

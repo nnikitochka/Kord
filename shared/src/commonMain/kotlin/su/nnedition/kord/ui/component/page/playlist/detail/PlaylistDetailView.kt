@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,8 @@ import kotlinx.coroutines.launch
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.remote.KordClient
+import su.nnedition.kord.player.PlayerManager
+import su.nnedition.kord.player.PlayerState
 
 @Composable
 fun PlaylistDetailView(
@@ -47,6 +50,10 @@ fun PlaylistDetailView(
 ) {
     val client = remember { KordClient.default }
     val coroutineScope = rememberCoroutineScope()
+    val player = remember { PlayerManager.instance }
+
+    val currentTrack by player.currentTrack.collectAsState()
+    val playerState by player.state.collectAsState()
 
     var detailedPlaylist by remember(playlist.id) { mutableStateOf<Playlist?>(null) }
     var isLoading by remember(playlist.id) { mutableStateOf(true) }
@@ -81,7 +88,9 @@ fun PlaylistDetailView(
         PlaylistDetailHeader(
             playlist = currentPlaylist,
             onPlayAll = {
-                // TODO: start playback of full playlist
+                if (tracks.isNotEmpty()) {
+                    player.setQueue(tracks = tracks, currentTrack = tracks.first(), autoPlay = true)
+                }
             }
         )
 
@@ -191,11 +200,17 @@ fun PlaylistDetailView(
                         .weight(1f)
                 ) {
                     itemsIndexed(tracks, key = { _, track -> track.id }) { index, track ->
+                        val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
                         PlaylistTrackItem(
                             track = track,
                             index = index + 1,
+                            isPlaying = isPlaying,
                             onClick = {
-                                // TODO: play this specific track
+                                if (currentTrack?.id == track.id) {
+                                    player.togglePlayPause()
+                                } else {
+                                    player.setQueue(tracks = tracks, currentTrack = track, autoPlay = true)
+                                }
                             }
                         )
                     }

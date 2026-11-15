@@ -7,6 +7,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import co.touchlab.kermit.Logger
+import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.service.AuthService
 import su.nnedition.kord.ui.navigation.AppNavigator
 import su.nnedition.kord.ui.navigation.MainRoute
@@ -26,6 +27,7 @@ fun KordApp(
         if (session != null) {
             logger.i { "Найдена сохранённая сессия для '${session.username}'. Переход на MainRoute." }
             navigator.replace(MainRoute)
+            PlayerManager.restoreQueue()
         } else {
             logger.i { "Сессия не найдена, открываем экран авторизации (ServerSelectRoute)." }
         }
@@ -38,6 +40,7 @@ fun KordApp(
             ServerSelectRoute -> ServerSelectScreen(
                 onLoginSuccess = {
                     navigator.replace(MainRoute)
+                    PlayerManager.restoreQueue()
                 }
             )
             MainRoute -> MainViewScreen()
