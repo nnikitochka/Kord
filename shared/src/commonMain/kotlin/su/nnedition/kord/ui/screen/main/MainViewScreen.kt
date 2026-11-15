@@ -9,12 +9,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import su.nnedition.kord.player.PlayerManager
+import su.nnedition.kord.ui.component.MiniPlayer
 import su.nnedition.kord.ui.component.page.CollectionsPage
 import su.nnedition.kord.ui.component.page.HomePage
 import su.nnedition.kord.ui.component.page.Page
@@ -58,12 +61,12 @@ fun MainViewScreen(
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxHeight()
-                .padding(6.dp, 6.dp, 0.dp, 6.dp)
+            modifier = Modifier.fillMaxHeight()
         ) {
             Column(
                 modifier = Modifier
@@ -91,17 +94,25 @@ fun MainViewScreen(
             }
         }
 
-        Spacer(Modifier.padding(horizontal = 3.dp))
-
-        Card(
+        Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight()
-                .padding(0.dp, 6.dp, 6.dp, 6.dp)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Crossfade(targetState = selectedPage) { page ->
-                page.Content(modifier = Modifier.fillMaxSize())
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                Crossfade(targetState = selectedPage) { page ->
+                    page.Content(modifier = Modifier.fillMaxSize())
+                }
             }
+
+            MiniPlayer(
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
