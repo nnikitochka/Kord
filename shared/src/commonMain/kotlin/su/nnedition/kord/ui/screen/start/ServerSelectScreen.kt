@@ -9,11 +9,8 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,9 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,9 +32,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,9 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.takeOrElse
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,11 +51,11 @@ import androidx.compose.ui.unit.dp
 import kord.shared.generated.resources.Res
 import kord.shared.generated.resources.visibility
 import kord.shared.generated.resources.visibility_off
-import org.jetbrains.compose.resources.painterResource
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
+import org.jetbrains.compose.resources.painterResource
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.data.remote.ServerConfig
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class ServerPingState {
     IDLE,
@@ -138,7 +128,7 @@ fun ServerSelectScreen() {
                         onExpandedChange = { protocolExpanded = it },
                         modifier = Modifier.width(120.dp)
                     ) {
-                        KordOutlinedTextField(
+                        OutlinedTextField(
                             value = protocol,
                             onValueChange = {},
                             readOnly = true,
@@ -146,8 +136,9 @@ fun ServerSelectScreen() {
                             trailingIcon = {
                                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = protocolExpanded)
                             },
-                            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                            contentPadding = PaddingValues(start = 10.dp, top = 2.dp, end = 4.dp, bottom = 4.dp),
+                            modifier = Modifier
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                .height(64.dp),
                             singleLine = true
                         )
                         ExposedDropdownMenu(
@@ -166,7 +157,7 @@ fun ServerSelectScreen() {
                         }
                     }
 
-                    KordOutlinedTextField(
+                    OutlinedTextField(
                         value = serverAddress,
                         onValueChange = { input ->
                             if (input.startsWith("https://", ignoreCase = true)) {
@@ -181,8 +172,9 @@ fun ServerSelectScreen() {
                         },
                         label = { Text("Адрес сервера") },
                         placeholder = { Text("your-server.com") },
-                        modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 4.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(64.dp),
                         singleLine = true,
                         trailingIcon = {
                             when (pingState) {
@@ -214,22 +206,24 @@ fun ServerSelectScreen() {
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                KordOutlinedTextField(
+                OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                KordOutlinedTextField(
+                OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation('*'),
                     singleLine = true,
                     trailingIcon = {
@@ -279,68 +273,3 @@ fun ServerSelectScreen() {
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun KordOutlinedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    readOnly: Boolean = false,
-    textStyle: TextStyle = LocalTextStyle.current,
-    label: @Composable (() -> Unit)? = null,
-    placeholder: @Composable (() -> Unit)? = null,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    singleLine: Boolean = true,
-    isError: Boolean = false,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    contentPadding: PaddingValues = PaddingValues(start = 12.dp, top = 2.dp, end = 12.dp, bottom = 4.dp)
-) {
-    val colors = OutlinedTextFieldDefaults.colors()
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val textColor = textStyle.color.takeOrElse {
-        if (isError) colors.errorTextColor
-        else if (!enabled) colors.disabledTextColor
-        else if (isFocused) colors.focusedTextColor
-        else colors.unfocusedTextColor
-    }
-    val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
-
-    BasicTextField(
-        value = value,
-        modifier = modifier.height(60.dp),
-        onValueChange = onValueChange,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = mergedTextStyle,
-        cursorBrush = SolidColor(if (isError) colors.errorCursorColor else colors.cursorColor),
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        interactionSource = interactionSource,
-        singleLine = singleLine,
-        decorationBox = @Composable { innerTextField ->
-            OutlinedTextFieldDefaults.DecorationBox(
-                value = value,
-                visualTransformation = visualTransformation,
-                innerTextField = innerTextField,
-                placeholder = placeholder,
-                label = label,
-                leadingIcon = leadingIcon,
-                trailingIcon = trailingIcon,
-                singleLine = singleLine,
-                enabled = enabled,
-                isError = isError,
-                interactionSource = interactionSource,
-                colors = colors,
-                contentPadding = contentPadding
-            )
-        }
-    )
-}
-
