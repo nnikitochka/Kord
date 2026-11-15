@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 compose.resources {
@@ -52,6 +53,7 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(libs.compose.ui)
             api(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
@@ -63,6 +65,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.http)
+            implementation(libs.kotlinx.serialization.json)
             api(libs.kermit)
         }
         commonTest.dependencies {

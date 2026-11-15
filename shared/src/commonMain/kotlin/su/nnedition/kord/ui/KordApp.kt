@@ -11,7 +11,7 @@ import su.nnedition.kord.service.AuthService
 import su.nnedition.kord.ui.navigation.AppNavigator
 import su.nnedition.kord.ui.navigation.MainRoute
 import su.nnedition.kord.ui.navigation.ServerSelectRoute
-import su.nnedition.kord.ui.screen.MainViewScreen
+import su.nnedition.kord.ui.screen.main.MainViewScreen
 import su.nnedition.kord.ui.screen.start.ServerSelectScreen
 
 @Composable
