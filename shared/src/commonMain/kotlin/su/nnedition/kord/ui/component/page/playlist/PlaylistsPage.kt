@@ -1,5 +1,7 @@
 package su.nnedition.kord.ui.component.page.playlist
 
+import androidx.compose.animation.Crossfade
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,6 +50,7 @@ import kotlinx.coroutines.launch
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.ui.component.page.Page
+import su.nnedition.kord.ui.component.page.playlist.detail.PlaylistDetailView
 
 object PlaylistsPage : Page {
     override val title: String = "Плейлисты"
@@ -72,6 +75,7 @@ object PlaylistsPage : Page {
         var isLoading by remember { mutableStateOf(true) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
+        var selectedPlaylist by remember { mutableStateOf<Playlist?>(null) }
         var selectedFilter by remember { mutableStateOf(PlaylistFilter.CREATED) }
         var showCreateDialog by remember { mutableStateOf(false) }
         var newPlaylistName by remember { mutableStateOf("") }
@@ -102,22 +106,24 @@ object PlaylistsPage : Page {
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // Header: Title with optional back button
+            // Header: Title with back button when inside playlist detail
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(
-                    onClick = { /* TODO: back navigation if opened from subscreen */ },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Назад",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                if (selectedPlaylist != null) {
+                    IconButton(
+                        onClick = { selectedPlaylist = null },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад к плейлистам",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Плейлисты",
                     style = MaterialTheme.typography.headlineMedium,
@@ -126,102 +132,118 @@ object PlaylistsPage : Page {
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Sub-filters row (chips)
-            val createdCount = playlists.count { !it.isPublic }
-            val favoritesCount = playlists.count { it.isPublic }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                FilterChip(
-                    selected = selectedFilter == PlaylistFilter.CREATED,
-                    onClick = { selectedFilter = PlaylistFilter.CREATED },
-                    label = { Text("Вы собрали • $createdCount") },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-                FilterChip(
-                    selected = selectedFilter == PlaylistFilter.FAVORITES,
-                    onClick = { selectedFilter = PlaylistFilter.FAVORITES },
-                    label = { Text("Вам понравилось • $favoritesCount") },
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Main body
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                    }
-                }
+            Crossfade(
+                targetState = selectedPlaylist,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) { targetPlaylist ->
+                if (targetPlaylist != null) {
+                    PlaylistDetailView(
+                        playlist = targetPlaylist,
+                        onBack = { selectedPlaylist = null }
+                    )
+                } else {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Sub-filters row (chips)
+                        val createdCount = playlists.count { !it.isPublic }
+                        val favoritesCount = playlists.count { it.isPublic }
 
-                errorMessage != null -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = errorMessage ?: "Произошла ошибка",
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodyLarge
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            FilterChip(
+                                selected = selectedFilter == PlaylistFilter.CREATED,
+                                onClick = { selectedFilter = PlaylistFilter.CREATED },
+                                label = { Text("Вы собрали • $createdCount") },
+                                shape = RoundedCornerShape(20.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Button(onClick = { loadPlaylists() }) {
-                                Text("Повторить")
-                            }
-                        }
-                    }
-                }
-
-                else -> {
-                    val filteredPlaylists = when (selectedFilter) {
-                        PlaylistFilter.CREATED -> playlists.filter { !it.isPublic }
-                        PlaylistFilter.FAVORITES -> playlists.filter { it.isPublic }
-                    }
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 150.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        contentPadding = PaddingValues(vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
-                    ) {
-                        // "Новый плейлист" card (first item in "Вы собрали")
-                        if (selectedFilter == PlaylistFilter.CREATED) {
-                            item {
-                                NewPlaylistCard(onClick = { showCreateDialog = true })
-                            }
+                            FilterChip(
+                                selected = selectedFilter == PlaylistFilter.FAVORITES,
+                                onClick = { selectedFilter = PlaylistFilter.FAVORITES },
+                                label = { Text("Вам понравилось • $favoritesCount") },
+                                shape = RoundedCornerShape(20.dp),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
                         }
 
-                        // Playlists items
-                        items(filteredPlaylists, key = { it.id }) { playlist ->
-                            PlaylistCard(
-                                playlist = playlist,
-                                onClick = { /* TODO: open playlist details */ }
-                            )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Main body
+                        when {
+                            isLoading -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                }
+                            }
+
+                            errorMessage != null -> {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = errorMessage ?: "Произошла ошибка",
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Spacer(modifier = Modifier.height(12.dp))
+                                        Button(onClick = { loadPlaylists() }) {
+                                            Text("Повторить")
+                                        }
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                val filteredPlaylists = when (selectedFilter) {
+                                    PlaylistFilter.CREATED -> playlists.filter { !it.isPublic }
+                                    PlaylistFilter.FAVORITES -> playlists.filter { it.isPublic }
+                                }
+
+                                LazyVerticalGrid(
+                                    columns = GridCells.Adaptive(minSize = 150.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f),
+                                    contentPadding = PaddingValues(vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                                ) {
+                                    // "Новый плейлист" card (first item in "Вы собрали")
+                                    if (selectedFilter == PlaylistFilter.CREATED) {
+                                        item {
+                                            NewPlaylistCard(onClick = { showCreateDialog = true })
+                                        }
+                                    }
+
+                                    // Playlists items
+                                    items(filteredPlaylists, key = { it.id }) { playlist ->
+                                        PlaylistCard(
+                                            playlist = playlist,
+                                            onClick = { selectedPlaylist = playlist }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
