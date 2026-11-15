@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class KordinatorRootResponseDto(
-    @SerialName("kordinator-response")
+    @SerialName("subsonic-response")
     val response: KordinatorResponseDto
 )
