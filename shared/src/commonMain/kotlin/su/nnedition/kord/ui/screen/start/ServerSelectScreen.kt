@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,17 +53,10 @@ import kord.shared.generated.resources.Res
 import kord.shared.generated.resources.visibility
 import kord.shared.generated.resources.visibility_off
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import su.nnedition.kord.data.remote.KordClient
-import su.nnedition.kord.data.remote.ServerConfig
+import su.nnedition.kord.service.AuthService
 import kotlin.time.Duration.Companion.milliseconds
-
-enum class ServerPingState {
-    IDLE,
-    CHECKING,
-    SUCCESS,
-    FAILED
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +72,8 @@ fun ServerSelectScreen() {
     var passwordVisible by remember { mutableStateOf(false) }
 
     var pingState by remember { mutableStateOf(ServerPingState.IDLE) }
-    val kordClient = remember { KordClient.default }
+    val coroutineScope = rememberCoroutineScope()
+    val authService = remember { AuthService.default }
 
     LaunchedEffect(protocol, serverAddress) {
         val trimmed = serverAddress.trim()
@@ -93,7 +88,7 @@ fun ServerSelectScreen() {
         pingState = ServerPingState.CHECKING
 
         val targetBase = "$protocol$trimmed".trimEnd('/')
-        val isReachable = kordClient.ping(targetBase)
+        val isReachable = authService.ping(targetBase)
 
         pingState = if (isReachable) ServerPingState.SUCCESS else ServerPingState.FAILED
     }
@@ -253,13 +248,13 @@ fun ServerSelectScreen() {
                         Button(
                             onClick = {
                                 val targetBase = "$protocol${serverAddress.trim()}".trimEnd('/')
-                                kordClient.updateConfig(
-                                    ServerConfig(
+                                coroutineScope.launch {
+                                    authService.login(
                                         baseUrl = targetBase,
                                         username = username,
                                         password = password
                                     )
-                                )
+                                }
                             },
                             enabled = username.isNotBlank() && password.isNotBlank(),
                             modifier = Modifier.fillMaxWidth(),
