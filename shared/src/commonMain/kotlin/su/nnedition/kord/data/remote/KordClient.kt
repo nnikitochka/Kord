@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.AlbumListType
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
@@ -123,7 +124,7 @@ class KordClient(
 
     private suspend fun executeKordinatorRequest(
         endpoint: String,
-        queryParams: Map<String, String> = emptyMap()
+        queryParams: List<Pair<String, String>>
     ): Result<KordinatorResponseDto> = runCatching {
         val cleanBase = config.baseUrl.trim().trimEnd('/')
         require(cleanBase.isNotEmpty()) { "URL сервера не настроен" }
@@ -132,7 +133,7 @@ class KordClient(
         val password = config.token.orEmpty()
         val authParams = "u=$username&p=$password&v=1.15.0&c=kord&f=json"
         val additionalParams = if (queryParams.isNotEmpty()) {
-            "&" + queryParams.entries.joinToString("&") { (k, v) ->
+            "&" + queryParams.joinToString("&") { (k, v) ->
                 "$k=${v.encodeURLParameter()}"
             }
         } else ""
@@ -159,6 +160,11 @@ class KordClient(
             error(errorMsg)
         }
     }
+
+    private suspend fun executeKordinatorRequest(
+        endpoint: String,
+        queryParams: Map<String, String> = emptyMap()
+    ): Result<KordinatorResponseDto> = executeKordinatorRequest(endpoint, queryParams.toList())
 
     suspend fun getArtists(): Result<List<Artist>> = runCatching {
         val response = executeKordinatorRequest("getArtists").getOrThrow()
@@ -241,6 +247,32 @@ class KordClient(
         Unit
     }.onFailure { error ->
         logger.e(error) { "Ошибка при создании плейлиста '$name': ${error.message}" }
+    }
+
+    suspend fun getPlayQueue(): Result<PlayQueue> = runCatching {
+        val response = executeKordinatorRequest("getPlayQueue").getOrThrow()
+        response.playQueue?.let { mapper.toPlayQueue(it) } ?: PlayQueue()
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка при получении очереди воспроизведения: ${error.message}" }
+    }
+
+    suspend fun savePlayQueue(
+        trackIds: List<String>,
+        currentTrackId: String,
+        positionMs: Long
+    ): Result<Unit> = runCatching {
+        val effectiveIds = if (trackIds.contains(currentTrackId)) trackIds else trackIds + currentTrackId
+        val params = mutableListOf<Pair<String, String>>()
+        effectiveIds.forEach { id ->
+            params.add("id" to id)
+        }
+        params.add("current" to currentTrackId)
+        params.add("position" to positionMs.toString())
+
+        executeKordinatorRequest("savePlayQueue", params).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка при сохранении очереди воспроизведения: ${error.message}" }
     }
 
     private fun extractErrorMessage(body: String): String? {

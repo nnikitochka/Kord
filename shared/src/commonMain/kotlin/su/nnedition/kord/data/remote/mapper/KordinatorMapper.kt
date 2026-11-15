@@ -2,6 +2,7 @@ package su.nnedition.kord.data.remote.mapper
 
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
@@ -10,6 +11,7 @@ import su.nnedition.kord.data.remote.dto.AlbumDetailDto
 import su.nnedition.kord.data.remote.dto.AlbumDto
 import su.nnedition.kord.data.remote.dto.ArtistDetailDto
 import su.nnedition.kord.data.remote.dto.ArtistDto
+import su.nnedition.kord.data.remote.dto.PlayQueueDto
 import su.nnedition.kord.data.remote.dto.PlaylistDetailDto
 import su.nnedition.kord.data.remote.dto.PlaylistDto
 import su.nnedition.kord.data.remote.dto.SearchResult3Dto
@@ -124,6 +126,17 @@ class KordinatorMapper(
             created = dto.created,
             changed = dto.changed,
             coverArtUrl = dto.coverArt?.let { getCoverArtUrl(it) },
+            tracks = dto.entry.map { toTrack(it) }
+        )
+    }
+
+    fun toPlayQueue(dto: PlayQueueDto): PlayQueue {
+        return PlayQueue(
+            currentTrackId = dto.current?.toString(),
+            positionMs = dto.position ?: 0L,
+            username = dto.username,
+            changed = dto.changed,
+            changedBy = dto.changedBy,
             tracks = dto.entry.map { toTrack(it) }
         )
     }
