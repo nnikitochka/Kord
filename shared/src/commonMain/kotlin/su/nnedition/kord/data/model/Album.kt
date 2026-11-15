@@ -4,11 +4,11 @@ data class Album(
     val id: String,
     val title: String,
     val artist: String,
-    val artistId: String?,
-    val coverArtUrl: String?,
-    val songCount: Int,
-    val durationSeconds: Long,
-    val year: Int?,
-    val genre: String?,
+    val artistId: String? = null,
+    val coverArtUrl: String? = null,
+    val songCount: Int = 0,
+    val durationSeconds: Long = 0L,
+    val year: Int? = null,
+    val genre: String? = null,
     val tracks: List<Track> = emptyList()
 )
