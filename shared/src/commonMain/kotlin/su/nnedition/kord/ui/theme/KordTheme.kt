@@ -24,7 +24,7 @@ val Int.scaledDp: Dp
 
 @Composable
 fun KordAppTheme(
-    uiScale: Int = 120,
+    uiScale: Int = 150,
     content: @Composable () -> Unit
 ) {
     val currentDensity = LocalDensity.current
