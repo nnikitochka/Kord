@@ -10,6 +10,7 @@ import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.ServerHealthComponent
 import su.nnedition.kord.data.model.ServerHealthInfo
+import su.nnedition.kord.data.model.StarredCollection
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.ServerConfig
@@ -26,6 +27,7 @@ import su.nnedition.kord.data.remote.dto.ScanStatusDto
 import su.nnedition.kord.data.remote.dto.SearchResult3Dto
 import su.nnedition.kord.data.remote.dto.ServerHealthDto
 import su.nnedition.kord.data.remote.dto.SongDto
+import su.nnedition.kord.data.remote.dto.Starred2Dto
 import su.nnedition.kord.data.remote.dto.UserDto
 
 class KordinatorMapper(
@@ -48,7 +50,8 @@ class KordinatorMapper(
             streamUrl = getStreamUrl(dto.id),
             bitRate = dto.bitRate,
             contentType = dto.contentType,
-            accentColor = dto.accentColor
+            accentColor = dto.accentColor,
+            isStarred = dto.starred != null
         )
     }
 
@@ -64,7 +67,8 @@ class KordinatorMapper(
             year = dto.year,
             genre = dto.genre,
             accentColor = dto.accentColor,
-            tracks = emptyList()
+            tracks = emptyList(),
+            isStarred = dto.starred != null
         )
     }
 
@@ -80,7 +84,8 @@ class KordinatorMapper(
             year = dto.year,
             genre = dto.genre,
             accentColor = dto.accentColor,
-            tracks = dto.song.map { toTrack(it) }
+            tracks = dto.song.map { toTrack(it) },
+            isStarred = false
         )
     }
 
@@ -90,7 +95,8 @@ class KordinatorMapper(
             name = dto.name,
             albumCount = dto.albumCount ?: 0,
             coverArtUrl = (dto.coverArt ?: dto.artistImageUrl)?.let { getCoverArtUrl(it) },
-            albums = emptyList()
+            albums = emptyList(),
+            isStarred = dto.starred != null
         )
     }
 
@@ -100,7 +106,16 @@ class KordinatorMapper(
             name = dto.name,
             albumCount = dto.albumCount ?: dto.album.size,
             coverArtUrl = (dto.coverArt ?: dto.artistImageUrl)?.let { getCoverArtUrl(it) },
-            albums = dto.album.map { toAlbum(it) }
+            albums = dto.album.map { toAlbum(it) },
+            isStarred = false
+        )
+    }
+
+    fun toStarredCollection(dto: Starred2Dto): StarredCollection {
+        return StarredCollection(
+            artists = dto.artist.map { toArtist(it).copy(isStarred = true) },
+            albums = dto.album.map { toAlbum(it).copy(isStarred = true) },
+            tracks = dto.song.map { toTrack(it).copy(isStarred = true) }
         )
     }
 

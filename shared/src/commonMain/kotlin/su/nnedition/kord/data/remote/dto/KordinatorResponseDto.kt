@@ -24,5 +24,7 @@ data class KordinatorResponseDto(
     val musicFolders: MusicFoldersRootDto? = null,
     val scanStatus: ScanStatusDto? = null,
     val nowPlaying: NowPlayingRootDto? = null,
-    val serverHealth: ServerHealthDto? = null
+    val serverHealth: ServerHealthDto? = null,
+    val starred2: Starred2Dto? = null,
+    val lyrics: LyricsDto? = null
 )

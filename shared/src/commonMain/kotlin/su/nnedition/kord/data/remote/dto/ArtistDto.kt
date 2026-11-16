@@ -8,5 +8,6 @@ data class ArtistDto(
     val name: String,
     val albumCount: Int? = null,
     val coverArt: String? = null,
-    val artistImageUrl: String? = null
+    val artistImageUrl: String? = null,
+    val starred: String? = null
 )

@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.ui.screen.common.Page
-import su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistDetailView
+import su.nnedition.kord.ui.screen.main.page.detail.playlist.PlaylistDetailView
 
 object PlaylistsPage : Page {
     override val title: String = "Плейлисты"

@@ -21,5 +21,6 @@ data class SongDto(
     val duration: Long? = null,
     val bitRate: Int? = null,
     val path: String? = null,
-    val accentColor: String? = null
+    val accentColor: String? = null,
+    val starred: String? = null
 )

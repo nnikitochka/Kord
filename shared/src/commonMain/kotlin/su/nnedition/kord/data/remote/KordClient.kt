@@ -19,10 +19,12 @@ import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.ServerHealthInfo
+import su.nnedition.kord.data.model.StarredCollection
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.dto.KordinatorResponseDto
 import su.nnedition.kord.data.remote.dto.KordinatorRootResponseDto
+import su.nnedition.kord.data.remote.dto.Starred2Dto
 import su.nnedition.kord.data.remote.mapper.KordinatorMapper
 import su.nnedition.kord.util.KermitKtorLogger
 import kotlin.time.Duration.Companion.milliseconds
@@ -388,6 +390,54 @@ class KordClient(
         mapper.toServerHealthInfo(dto)
     }.onFailure { error ->
         logger.w { "Ошибка получения состояния здоровья сервера: ${error.message}" }
+    }
+
+    suspend fun getStarred(): Result<StarredCollection> = runCatching {
+        val response = executeKordinatorRequest("getStarred2", emptyList()).getOrThrow()
+        val dto = response.starred2 ?: Starred2Dto()
+        mapper.toStarredCollection(dto)
+    }.onFailure { error ->
+        logger.w { "Ошибка получения избранного: ${error.message}" }
+    }
+
+    suspend fun star(
+        trackIds: List<String> = emptyList(),
+        albumIds: List<String> = emptyList(),
+        artistIds: List<String> = emptyList()
+    ): Result<Unit> = runCatching {
+        val params = buildList {
+            trackIds.forEach { add("id" to it) }
+            albumIds.forEach { add("albumId" to it) }
+            artistIds.forEach { add("artistId" to it) }
+        }
+        executeKordinatorRequest("star", params).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.w { "Ошибка добавления в избранное: ${error.message}" }
+    }
+
+    suspend fun unstar(
+        trackIds: List<String> = emptyList(),
+        albumIds: List<String> = emptyList(),
+        artistIds: List<String> = emptyList()
+    ): Result<Unit> = runCatching {
+        val params = buildList {
+            trackIds.forEach { add("id" to it) }
+            albumIds.forEach { add("albumId" to it) }
+            artistIds.forEach { add("artistId" to it) }
+        }
+        executeKordinatorRequest("unstar", params).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.w { "Ошибка удаления из избранного: ${error.message}" }
+    }
+
+    suspend fun getLyrics(artist: String, title: String): Result<String> = runCatching {
+        val params = mapOf("artist" to artist, "title" to title)
+        val response = executeKordinatorRequest("getLyrics", params).getOrThrow()
+        response.lyrics?.content ?: ""
+    }.onFailure { error ->
+        logger.w { "Ошибка получения текста песни: ${error.message}" }
     }
 
     private fun extractErrorMessage(body: String): String? {

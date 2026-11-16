@@ -1,4 +1,4 @@
-package su.nnedition.kord.ui.screen.main.page.playlist.detail
+package su.nnedition.kord.ui.screen.main.page.detail.playlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,7 +85,7 @@ fun PlaylistDetailView(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistDetailHeader(
+        PlaylistDetailHeader(
             playlist = currentPlaylist,
             onPlayAll = {
                 if (tracks.isNotEmpty()) {
@@ -201,7 +201,7 @@ fun PlaylistDetailView(
                 ) {
                     itemsIndexed(tracks, key = { _, track -> track.id }) { index, track ->
                         val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
-                        su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistTrackItem(
+                        PlaylistTrackItem(
                             track = track,
                             index = index + 1,
                             isPlaying = isPlaying,
@@ -227,7 +227,7 @@ fun PlaylistDetailView(
 @Preview
 @Composable
 private fun PlaylistDetailViewPreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistDetailView(
+    PlaylistDetailView(
         playlist = Playlist(
             id = "preview_1",
             name = "Любимые треки",

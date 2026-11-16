@@ -5,5 +5,6 @@ data class Artist(
     val name: String,
     val albumCount: Int = 0,
     val coverArtUrl: String? = null,
-    val albums: List<Album> = emptyList()
+    val albums: List<Album> = emptyList(),
+    val isStarred: Boolean = false
 )

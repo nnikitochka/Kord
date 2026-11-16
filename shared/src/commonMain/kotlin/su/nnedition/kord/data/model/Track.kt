@@ -16,5 +16,6 @@ data class Track(
     val streamUrl: String = "",
     val bitRate: Int? = null,
     val contentType: String? = null,
-    val accentColor: String? = null
+    val accentColor: String? = null,
+    val isStarred: Boolean = false
 )

@@ -1,4 +1,4 @@
-package su.nnedition.kord.ui.screen.main.page.playlist.detail
+package su.nnedition.kord.ui.screen.main.page.detail.playlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

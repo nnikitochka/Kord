@@ -1,4 +1,4 @@
-package su.nnedition.kord.ui.screen.main.page.playlist.detail
+package su.nnedition.kord.ui.screen.main.page.detail.playlist
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing

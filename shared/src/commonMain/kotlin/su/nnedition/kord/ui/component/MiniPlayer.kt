@@ -60,6 +60,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -81,6 +82,8 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.abs
 import kotlin.time.TimeSource
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.onHover
 import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.player.PlayerState
@@ -92,6 +95,8 @@ fun MiniPlayer(
     shape: Shape = RoundedCornerShape(14.dp)
 ) {
     val player = remember { PlayerManager.instance }
+    val client = remember { KordClient.default }
+    val coroutineScope = rememberCoroutineScope()
 
     val currentTrack by player.currentTrack.collectAsState()
     val playerState by player.state.collectAsState()
@@ -104,6 +109,11 @@ fun MiniPlayer(
     var isShuffle by remember { mutableStateOf(false) }
     var isRepeat by remember { mutableStateOf(false) }
     var showVolumeSlider by remember { mutableStateOf(false) }
+    var showLyricsDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentTrack?.id) {
+        isLiked = currentTrack?.isStarred == true
+    }
 
     var isCardHovered by remember { mutableStateOf(false) }
 
@@ -425,7 +435,21 @@ fun MiniPlayer(
 
                         // Like
                         IconButton(
-                            onClick = { isLiked = !isLiked },
+                            onClick = {
+                                val track = currentTrack ?: return@IconButton
+                                val newStarred = !isLiked
+                                isLiked = newStarred
+                                coroutineScope.launch {
+                                    val res = if (newStarred) {
+                                        client.star(trackIds = listOf(track.id))
+                                    } else {
+                                        client.unstar(trackIds = listOf(track.id))
+                                    }
+                                    if (res.isFailure) {
+                                        isLiked = !newStarred
+                                    }
+                                }
+                            },
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
@@ -445,13 +469,17 @@ fun MiniPlayer(
                     ) {
                         // Lyrics
                         IconButton(
-                            onClick = { /* Lyrics */ },
+                            onClick = {
+                                if (currentTrack != null) {
+                                    showLyricsDialog = true
+                                }
+                            },
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Article,
                                 contentDescription = "Текст песни",
-                                tint = Color.White.copy(alpha = 0.5f),
+                                tint = if (showLyricsDialog) yellowAccent else Color.White.copy(alpha = 0.5f),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -677,6 +705,13 @@ fun MiniPlayer(
                 }
             }
         }
+    }
+
+    if (showLyricsDialog && currentTrack != null) {
+        LyricsDialog(
+            track = currentTrack!!,
+            onDismiss = { showLyricsDialog = false }
+        )
     }
 }
 

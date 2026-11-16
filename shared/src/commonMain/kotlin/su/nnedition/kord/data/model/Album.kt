@@ -11,5 +11,6 @@ data class Album(
     val year: Int? = null,
     val genre: String? = null,
     val accentColor: String? = null,
-    val tracks: List<Track> = emptyList()
+    val tracks: List<Track> = emptyList(),
+    val isStarred: Boolean = false
 )

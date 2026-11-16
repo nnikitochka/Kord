@@ -1,6 +1,7 @@
 package su.nnedition.kord.ui.screen.main.page.search
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,8 @@ import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.player.PlayerState
 import su.nnedition.kord.ui.screen.common.Page
+import su.nnedition.kord.ui.screen.main.page.detail.AlbumDetailsPage
+import su.nnedition.kord.ui.screen.main.page.detail.ArtistDetailsPage
 import kotlin.time.Duration.Companion.milliseconds
 
 object SearchPage : Page {
@@ -61,6 +64,9 @@ object SearchPage : Page {
         var searchResult by remember { mutableStateOf<SearchResult?>(null) }
         var isLoading by remember { mutableStateOf(false) }
         var trackPage by remember { mutableIntStateOf(0) }
+
+        var selectedAlbumId by remember { mutableStateOf<String?>(null) }
+        var selectedArtistId by remember { mutableStateOf<String?>(null) }
 
         // Live search with debounce
         LaunchedEffect(query) {
@@ -83,11 +89,38 @@ object SearchPage : Page {
             isLoading = false
         }
 
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
+        Crossfade(
+            targetState = Pair(selectedAlbumId, selectedArtistId),
+            modifier = modifier.fillMaxSize()
+        ) { (albumId, artistId) ->
+            when {
+                albumId != null -> {
+                    AlbumDetailsPage(
+                        albumId = albumId,
+                        onBack = { selectedAlbumId = null },
+                        onArtistClick = { newArtistId ->
+                            selectedArtistId = newArtistId
+                            selectedAlbumId = null
+                        }
+                    )
+                }
+
+                artistId != null -> {
+                    ArtistDetailsPage(
+                        artistId = artistId,
+                        onBack = { selectedArtistId = null },
+                        onAlbumClick = { album ->
+                            selectedAlbumId = album.id
+                        }
+                    )
+                }
+
+                else -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
             // 1. Search Input Bar
             SearchInputBar(
                 query = query,
@@ -205,7 +238,7 @@ object SearchPage : Page {
                                             su.nnedition.kord.ui.screen.main.page.search.section.AlbumsSection(
                                                 albums = result.albums,
                                                 onAlbumClick = { album ->
-                                                    //@TODO Future: navigate to album or play
+                                                    selectedAlbumId = album.id
                                                 }
                                             )
                                         }
@@ -217,7 +250,7 @@ object SearchPage : Page {
                                             su.nnedition.kord.ui.screen.main.page.search.section.ArtistsSection(
                                                 artists = result.artists,
                                                 onArtistClick = { artist ->
-                                                    //@TODO Future: navigate to artist
+                                                    selectedArtistId = artist.id
                                                 }
                                             )
                                         }
@@ -298,7 +331,9 @@ object SearchPage : Page {
                                             albumRow.forEach { album ->
                                                 SearchAlbumCard(
                                                     album = album,
-                                                    onClick = {}
+                                                    onClick = {
+                                                        selectedAlbumId = album.id
+                                                    }
                                                 )
                                             }
                                         }
@@ -324,7 +359,9 @@ object SearchPage : Page {
                                             artistRow.forEach { artist ->
                                                 SearchArtistCard(
                                                     artist = artist,
-                                                    onClick = {}
+                                                    onClick = {
+                                                        selectedArtistId = artist.id
+                                                    }
                                                 )
                                             }
                                         }
@@ -337,6 +374,9 @@ object SearchPage : Page {
             }
         }
     }
+}
+}
+}
 }
 
 @Preview
