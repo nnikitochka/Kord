@@ -41,7 +41,7 @@ import su.nnedition.kord.ui.component.page.CollectionsPage
 import su.nnedition.kord.ui.component.page.HomePage
 import su.nnedition.kord.ui.component.page.Page
 import su.nnedition.kord.ui.component.page.playlist.PlaylistsPage
-import su.nnedition.kord.ui.component.page.SearchPage
+import su.nnedition.kord.ui.component.page.search.SearchPage
 import su.nnedition.kord.ui.component.page.SettingsPage
 
 @Composable
