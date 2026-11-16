@@ -31,6 +31,11 @@ class KordClient(
         install(Logging) {
             logger = KermitKtorLogger("KordHttpClient")
             level = LogLevel.ALL
+            filter { request ->
+                val urlStr = request.url.toString()
+                !urlStr.contains("getCoverArt", ignoreCase = true) &&
+                !urlStr.contains("stream", ignoreCase = true)
+            }
         }
     }
 

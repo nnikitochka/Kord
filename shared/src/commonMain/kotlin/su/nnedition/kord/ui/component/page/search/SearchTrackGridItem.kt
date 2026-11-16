@@ -34,14 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import su.nnedition.kord.data.model.Track
+import su.nnedition.kord.ui.component.image.CoverImage
 import su.nnedition.kord.util.TimeFormatter
 
 @Composable
@@ -89,33 +88,34 @@ fun SearchTrackGridItem(
     ) {
         // Track Cover
         Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(Brush.linearGradient(defaultGradient)),
+            modifier = Modifier.size(44.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (isHovered) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Воспроизвести",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            } else if (isPlaying) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                    contentDescription = "Играет",
-                    tint = Color.White,
-                    modifier = Modifier.size(22.dp)
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.MusicNote,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.85f),
-                    modifier = Modifier.size(20.dp)
-                )
+            CoverImage(
+                url = track.coverArtUrl,
+                contentDescription = track.title,
+                modifier = Modifier.size(44.dp),
+                shape = RoundedCornerShape(6.dp),
+                accentColor = track.accentColor,
+                fallbackIcon = Icons.Default.MusicNote,
+                iconSize = 20.dp
+            )
+
+            if (isHovered || isPlaying) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color.Black.copy(alpha = 0.45f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.AutoMirrored.Filled.VolumeUp else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Играет" else "Воспроизвести",
+                        tint = Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
 

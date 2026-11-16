@@ -1,13 +1,9 @@
 package su.nnedition.kord.ui.component.page.playlist.detail
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -18,8 +14,6 @@ import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,13 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import su.nnedition.kord.data.model.Playlist
+import su.nnedition.kord.ui.component.image.CoverImage
 import su.nnedition.kord.ui.component.page.playlist.PlaylistsPage.playlistGradients
 import su.nnedition.kord.util.TimeFormatter
 
@@ -53,27 +46,14 @@ fun PlaylistDetailHeader(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .size(160.dp)
-                .aspectRatio(1f),
+        CoverImage(
+            url = playlist.coverArtUrl,
+            contentDescription = playlist.name,
+            modifier = Modifier.size(160.dp),
             shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Brush.linearGradient(gradient)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = Color.White.copy(alpha = 0.9f)
-                )
-            }
-        }
+            fallbackIcon = Icons.AutoMirrored.Filled.PlaylistPlay,
+            iconSize = 64.dp
+        )
 
         Column(
             modifier = Modifier.weight(1f)

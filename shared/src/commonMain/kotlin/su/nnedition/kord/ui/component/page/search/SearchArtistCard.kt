@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.ui.component.image.CoverImage
 
 @Composable
 fun SearchArtistCard(
@@ -79,17 +80,16 @@ fun SearchArtistCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
-            modifier = Modifier
-                .size(108.dp)
-                .clip(CircleShape)
-                .background(Brush.linearGradient(defaultGradient)),
+            modifier = Modifier.size(108.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier.size(46.dp)
+            CoverImage(
+                url = artist.coverArtUrl,
+                contentDescription = artist.name,
+                modifier = Modifier.fillMaxSize(),
+                shape = CircleShape,
+                fallbackIcon = Icons.Default.Person,
+                iconSize = 46.dp
             )
 
             if (isHovered) {
