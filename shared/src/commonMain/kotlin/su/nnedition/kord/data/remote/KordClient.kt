@@ -12,10 +12,13 @@ import kotlinx.serialization.json.Json
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.AlbumListType
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.MusicFolder
 import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
+import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
+import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.dto.KordinatorResponseDto
 import su.nnedition.kord.data.remote.dto.KordinatorRootResponseDto
 import su.nnedition.kord.data.remote.mapper.KordinatorMapper
@@ -278,6 +281,81 @@ class KordClient(
         Unit
     }.onFailure { error ->
         logger.e(error) { "Ошибка при сохранении очереди воспроизведения: ${error.message}" }
+    }
+
+    suspend fun getUser(username: String): Result<User> = runCatching {
+        val response = executeKordinatorRequest(
+            endpoint = "getUser",
+            queryParams = listOf("username" to username)
+        ).getOrThrow()
+        val userDto = response.user ?: error("Пользователь не найден")
+        mapper.toUser(userDto)
+    }.onFailure { error ->
+        logger.w { "Ошибка получения пользователя '$username': ${error.message}" }
+    }
+
+    suspend fun getUsers(): Result<List<User>> = runCatching {
+        val response = executeKordinatorRequest(
+            endpoint = "getUsers",
+            queryParams = emptyList()
+        ).getOrThrow()
+        response.users?.user?.map { mapper.toUser(it) } ?: emptyList()
+    }.onFailure { error ->
+        logger.w { "Ошибка получения списка пользователей: ${error.message}" }
+    }
+
+    suspend fun createUser(
+        username: String,
+        password: String,
+        email: String,
+        adminRole: Boolean = false,
+        streamRole: Boolean = true,
+        downloadRole: Boolean = false,
+        uploadRole: Boolean = false
+    ): Result<Unit> = runCatching {
+        val params = listOf(
+            "username" to username,
+            "password" to password,
+            "email" to email,
+            "adminRole" to adminRole.toString(),
+            "streamRole" to streamRole.toString(),
+            "downloadRole" to downloadRole.toString(),
+            "uploadRole" to uploadRole.toString()
+        )
+        executeKordinatorRequest("createUser", params).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка создания пользователя '$username': ${error.message}" }
+    }
+
+    suspend fun deleteUser(username: String): Result<Unit> = runCatching {
+        executeKordinatorRequest("deleteUser", listOf("username" to username)).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка удаления пользователя '$username': ${error.message}" }
+    }
+
+    suspend fun getMusicFolders(): Result<List<MusicFolder>> = runCatching {
+        val response = executeKordinatorRequest("getMusicFolders", emptyList()).getOrThrow()
+        response.musicFolders?.musicFolder?.map { mapper.toMusicFolder(it) } ?: emptyList()
+    }.onFailure { error ->
+        logger.w { "Ошибка получения музыкальных папок: ${error.message}" }
+    }
+
+    suspend fun startScan(): Result<ScanStatus> = runCatching {
+        val response = executeKordinatorRequest("startScan", emptyList()).getOrThrow()
+        val dto = response.scanStatus ?: error("Отсутствует scanStatus в ответе")
+        mapper.toScanStatus(dto)
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка запуска сканирования: ${error.message}" }
+    }
+
+    suspend fun getScanStatus(): Result<ScanStatus> = runCatching {
+        val response = executeKordinatorRequest("getScanStatus", emptyList()).getOrThrow()
+        val dto = response.scanStatus ?: error("Отсутствует scanStatus в ответе")
+        mapper.toScanStatus(dto)
+    }.onFailure { error ->
+        logger.w { "Ошибка проверки статуса сканирования: ${error.message}" }
     }
 
     private fun extractErrorMessage(body: String): String? {

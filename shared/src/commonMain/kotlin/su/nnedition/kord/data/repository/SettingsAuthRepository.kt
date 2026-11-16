@@ -11,16 +11,19 @@ class SettingsAuthRepository(
         settings.putString(KEY_SERVER_URL, session.serverUrl)
         settings.putString(KEY_USERNAME, session.username)
         settings.putString(KEY_TOKEN, session.token)
+        settings.putBoolean(KEY_IS_ADMIN, session.isAdmin)
     }
 
     override fun getSession(): UserSession? {
         val url = settings.getStringOrNull(KEY_SERVER_URL) ?: return null
         val user = settings.getStringOrNull(KEY_USERNAME) ?: return null
         val token = settings.getStringOrNull(KEY_TOKEN) ?: return null
+        val isAdmin = settings.getBoolean(KEY_IS_ADMIN, false)
         return UserSession(
             serverUrl = url,
             username = user,
-            token = token
+            token = token,
+            isAdmin = isAdmin
         )
     }
 
@@ -28,11 +31,13 @@ class SettingsAuthRepository(
         settings.remove(KEY_SERVER_URL)
         settings.remove(KEY_USERNAME)
         settings.remove(KEY_TOKEN)
+        settings.remove(KEY_IS_ADMIN)
     }
 
     companion object {
         private const val KEY_SERVER_URL = "auth_server_url"
         private const val KEY_USERNAME = "auth_username"
         private const val KEY_TOKEN = "auth_token"
+        private const val KEY_IS_ADMIN = "auth_is_admin"
     }
 }

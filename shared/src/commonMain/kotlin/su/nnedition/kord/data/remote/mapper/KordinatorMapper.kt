@@ -2,20 +2,26 @@ package su.nnedition.kord.data.remote.mapper
 
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.Artist
+import su.nnedition.kord.data.model.MusicFolder
 import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
+import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.model.Track
+import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.ServerConfig
 import su.nnedition.kord.data.remote.dto.AlbumDetailDto
 import su.nnedition.kord.data.remote.dto.AlbumDto
 import su.nnedition.kord.data.remote.dto.ArtistDetailDto
 import su.nnedition.kord.data.remote.dto.ArtistDto
+import su.nnedition.kord.data.remote.dto.MusicFolderDto
 import su.nnedition.kord.data.remote.dto.PlayQueueDto
 import su.nnedition.kord.data.remote.dto.PlaylistDetailDto
 import su.nnedition.kord.data.remote.dto.PlaylistDto
+import su.nnedition.kord.data.remote.dto.ScanStatusDto
 import su.nnedition.kord.data.remote.dto.SearchResult3Dto
 import su.nnedition.kord.data.remote.dto.SongDto
+import su.nnedition.kord.data.remote.dto.UserDto
 
 class KordinatorMapper(
     private val configProvider: () -> ServerConfig
@@ -141,6 +147,33 @@ class KordinatorMapper(
             changed = dto.changed,
             changedBy = dto.changedBy,
             tracks = dto.entry.map { toTrack(it) }
+        )
+    }
+
+    fun toUser(dto: UserDto): User {
+        return User(
+            username = dto.username,
+            email = dto.email,
+            isAdmin = dto.adminRole || dto.username.equals("admin", ignoreCase = true),
+            canStream = dto.streamRole,
+            canDownload = dto.downloadRole,
+            canUpload = dto.uploadRole,
+            canSettings = dto.settingsRole,
+            allowedFolderIds = emptyList()
+        )
+    }
+
+    fun toMusicFolder(dto: MusicFolderDto): MusicFolder {
+        return MusicFolder(
+            id = dto.id,
+            name = dto.name
+        )
+    }
+
+    fun toScanStatus(dto: ScanStatusDto): ScanStatus {
+        return ScanStatus(
+            isScanning = dto.scanning,
+            scannedCount = dto.count
         )
     }
 

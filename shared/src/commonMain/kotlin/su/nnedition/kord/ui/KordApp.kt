@@ -13,9 +13,11 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import io.ktor.client.HttpClient
 import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.service.AuthService
+import su.nnedition.kord.ui.navigation.AdminPanelRoute
 import su.nnedition.kord.ui.navigation.AppNavigator
 import su.nnedition.kord.ui.navigation.MainRoute
 import su.nnedition.kord.ui.navigation.ServerSelectRoute
+import su.nnedition.kord.ui.screen.admin.AdminPanelScreen
 import su.nnedition.kord.ui.screen.main.MainViewScreen
 import su.nnedition.kord.ui.screen.start.ServerSelectScreen
 
@@ -42,6 +44,7 @@ fun KordApp(
             logger.i { "Найдена сохранённая сессия для '${session.username}'. Переход на MainRoute." }
             navigator.replace(MainRoute)
             PlayerManager.restoreQueue()
+            authService.refreshUserRole()
         } else {
             logger.i { "Сессия не найдена, открываем экран авторизации (ServerSelectRoute)." }
         }
@@ -58,6 +61,9 @@ fun KordApp(
                 }
             )
             MainRoute -> MainViewScreen()
+            AdminPanelRoute -> AdminPanelScreen(
+                onBack = { navigator.pop() }
+            )
         }
     }
 }

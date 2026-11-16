@@ -18,5 +18,9 @@ data class KordinatorResponseDto(
     val searchResult3: SearchResult3Dto? = null,
     val playlists: PlaylistsRootDto? = null,
     val playlist: PlaylistDetailDto? = null,
-    val playQueue: PlayQueueDto? = null
+    val playQueue: PlayQueueDto? = null,
+    val user: UserDto? = null,
+    val users: UsersRootDto? = null,
+    val musicFolders: MusicFoldersRootDto? = null,
+    val scanStatus: ScanStatusDto? = null
 )
