@@ -10,5 +10,6 @@ data class Album(
     val durationSeconds: Long = 0L,
     val year: Int? = null,
     val genre: String? = null,
+    val accentColor: String? = null,
     val tracks: List<Track> = emptyList()
 )

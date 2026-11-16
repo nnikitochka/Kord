@@ -13,5 +13,6 @@ data class AlbumDto(
     val songCount: Int? = null,
     val duration: Long? = null,
     val year: Int? = null,
-    val genre: String? = null
+    val genre: String? = null,
+    val accentColor: String? = null
 )

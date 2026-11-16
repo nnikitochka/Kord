@@ -36,7 +36,8 @@ class KordinatorMapper(
             coverArtUrl = dto.coverArt?.let { getCoverArtUrl(it) },
             streamUrl = getStreamUrl(dto.id),
             bitRate = dto.bitRate,
-            contentType = dto.contentType
+            contentType = dto.contentType,
+            accentColor = dto.accentColor
         )
     }
 
@@ -51,6 +52,7 @@ class KordinatorMapper(
             durationSeconds = dto.duration ?: 0L,
             year = dto.year,
             genre = dto.genre,
+            accentColor = dto.accentColor,
             tracks = emptyList()
         )
     }
@@ -66,6 +68,7 @@ class KordinatorMapper(
             durationSeconds = dto.duration ?: dto.song.sumOf { it.duration ?: 0L },
             year = dto.year,
             genre = dto.genre,
+            accentColor = dto.accentColor,
             tracks = dto.song.map { toTrack(it) }
         )
     }
