@@ -76,7 +76,7 @@ object PlaylistsPage : Page {
         var errorMessage by remember { mutableStateOf<String?>(null) }
 
         var selectedPlaylist by remember { mutableStateOf<Playlist?>(null) }
-        var selectedFilter by remember { mutableStateOf(su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.CREATED) }
+        var selectedFilter by remember { mutableStateOf(PlaylistFilter.CREATED) }
         var showCreateDialog by remember { mutableStateOf(false) }
         var newPlaylistName by remember { mutableStateOf("") }
         var isCreating by remember { mutableStateOf(false) }
@@ -141,7 +141,7 @@ object PlaylistsPage : Page {
                     .weight(1f)
             ) { targetPlaylist ->
                 if (targetPlaylist != null) {
-                    su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistDetailView(
+                    PlaylistDetailView(
                         playlist = targetPlaylist,
                         onBack = { selectedPlaylist = null }
                     )
@@ -156,8 +156,8 @@ object PlaylistsPage : Page {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             FilterChip(
-                                selected = selectedFilter == su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.CREATED,
-                                onClick = { selectedFilter = su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.CREATED },
+                                selected = selectedFilter == PlaylistFilter.CREATED,
+                                onClick = { selectedFilter = PlaylistFilter.CREATED },
                                 label = { Text("Вы собрали • $createdCount") },
                                 shape = RoundedCornerShape(20.dp),
                                 colors = FilterChipDefaults.filterChipColors(
@@ -166,8 +166,8 @@ object PlaylistsPage : Page {
                                 )
                             )
                             FilterChip(
-                                selected = selectedFilter == su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.FAVORITES,
-                                onClick = { selectedFilter = su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.FAVORITES },
+                                selected = selectedFilter == PlaylistFilter.FAVORITES,
+                                onClick = { selectedFilter = PlaylistFilter.FAVORITES },
                                 label = { Text("Вам понравилось • $favoritesCount") },
                                 shape = RoundedCornerShape(20.dp),
                                 colors = FilterChipDefaults.filterChipColors(
@@ -215,8 +215,8 @@ object PlaylistsPage : Page {
 
                             else -> {
                                 val filteredPlaylists = when (selectedFilter) {
-                                    su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.CREATED -> playlists.filter { !it.isPublic }
-                                    su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.FAVORITES -> playlists.filter { it.isPublic }
+                                    PlaylistFilter.CREATED -> playlists.filter { !it.isPublic }
+                                    PlaylistFilter.FAVORITES -> playlists.filter { it.isPublic }
                                 }
 
                                 LazyVerticalGrid(
@@ -229,16 +229,17 @@ object PlaylistsPage : Page {
                                     verticalArrangement = Arrangement.spacedBy(20.dp)
                                 ) {
                                     // "Новый плейлист" card (first item in "Вы собрали")
-                                    if (selectedFilter == su.nnedition.kord.ui.screen.main.page.playlist.PlaylistFilter.CREATED) {
+                                    if (selectedFilter == PlaylistFilter.CREATED) {
                                         item {
-                                            su.nnedition.kord.ui.screen.main.page.playlist.NewPlaylistCard(
-                                                onClick = { showCreateDialog = true })
+                                            NewPlaylistCard(
+                                                onClick = { showCreateDialog = true }
+                                            )
                                         }
                                     }
 
                                     // Playlists items
                                     items(filteredPlaylists, key = { it.id }) { playlist ->
-                                        su.nnedition.kord.ui.screen.main.page.playlist.PlaylistCard(
+                                        PlaylistCard(
                                             playlist = playlist,
                                             onClick = { selectedPlaylist = playlist }
                                         )
@@ -323,5 +324,5 @@ object PlaylistsPage : Page {
 @Preview
 @Composable
 private fun PlaylistsPagePreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.Content(modifier = Modifier.fillMaxSize())
+    PlaylistsPage.Content(modifier = Modifier.fillMaxSize())
 }

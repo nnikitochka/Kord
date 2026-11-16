@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Card
@@ -25,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +36,7 @@ import su.nnedition.kord.data.model.User
 fun AdminUserItem(
     user: User,
     onDeleteClick: (User) -> Unit,
+    onChangePasswordClick: (User) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -121,6 +122,31 @@ fun AdminUserItem(
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         )
                     }
+
+                    if (user.canUpload) {
+                        Text(
+                            text = "Загрузка",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+
+                    val rate = user.maxBitRate
+                    if (rate != null && rate > 0) {
+                        Text(
+                            text = "$rate kbps",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
                 }
 
                 if (!user.email.isNullOrBlank()) {
@@ -130,6 +156,16 @@ fun AdminUserItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            IconButton(
+                onClick = { onChangePasswordClick(user) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Key,
+                    contentDescription = "Сменить пароль",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             if (!user.isAdmin) {
@@ -160,9 +196,11 @@ private fun AdminUserItemPreview() {
                 email = "admin@kord.local",
                 isAdmin = true,
                 canStream = true,
-                canDownload = true
+                canDownload = true,
+                maxBitRate = 320
             ),
-            onDeleteClick = {}
+            onDeleteClick = {},
+            onChangePasswordClick = {}
         )
         AdminUserItem(
             user = User(
@@ -170,9 +208,11 @@ private fun AdminUserItemPreview() {
                 email = "guest@kord.local",
                 isAdmin = false,
                 canStream = true,
-                canDownload = false
+                canDownload = false,
+                maxBitRate = 128
             ),
-            onDeleteClick = {}
+            onDeleteClick = {},
+            onChangePasswordClick = {}
         )
     }
 }

@@ -34,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.ui.component.image.CoverImage
-import su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients
 
 @Composable
 fun PlaylistCard(
@@ -42,11 +41,6 @@ fun PlaylistCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gradient = remember(playlist.id) {
-        val idx = (playlist.id.hashCode() and 0x7FFFFFFF) % su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients.size
-        su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients[idx]
-    }
-
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -104,7 +98,7 @@ fun PlaylistCard(
 @Preview
 @Composable
 private fun PlaylistCardPreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.PlaylistCard(
+    PlaylistCard(
         playlist = Playlist(
             id = "preview_1",
             name = "Любимые треки",

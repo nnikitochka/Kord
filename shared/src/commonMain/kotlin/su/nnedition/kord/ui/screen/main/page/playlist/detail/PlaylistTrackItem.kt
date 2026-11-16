@@ -152,7 +152,7 @@ fun PlaylistTrackItem(
 @Preview
 @Composable
 private fun PlaylistTrackItemPreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistTrackItem(
+    PlaylistTrackItem(
         track = Track(
             id = "1",
             title = "А река течёт",

@@ -13,10 +13,12 @@ import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.AlbumListType
 import su.nnedition.kord.data.model.Artist
 import su.nnedition.kord.data.model.MusicFolder
+import su.nnedition.kord.data.model.NowPlayingItem
 import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
+import su.nnedition.kord.data.model.ServerHealthInfo
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.dto.KordinatorResponseDto
@@ -311,9 +313,10 @@ class KordClient(
         adminRole: Boolean = false,
         streamRole: Boolean = true,
         downloadRole: Boolean = false,
-        uploadRole: Boolean = false
+        uploadRole: Boolean = false,
+        maxBitRate: Int? = null
     ): Result<Unit> = runCatching {
-        val params = listOf(
+        val params = mutableListOf(
             "username" to username,
             "password" to password,
             "email" to email,
@@ -322,10 +325,24 @@ class KordClient(
             "downloadRole" to downloadRole.toString(),
             "uploadRole" to uploadRole.toString()
         )
+        if (maxBitRate != null && maxBitRate > 0) {
+            params.add("maxBitRate" to maxBitRate.toString())
+        }
         executeKordinatorRequest("createUser", params).getOrThrow()
         Unit
     }.onFailure { error ->
         logger.e(error) { "Ошибка создания пользователя '$username': ${error.message}" }
+    }
+
+    suspend fun changePassword(username: String, newPassword: String): Result<Unit> = runCatching {
+        val params = listOf(
+            "username" to username,
+            "password" to newPassword
+        )
+        executeKordinatorRequest("changePassword", params).getOrThrow()
+        Unit
+    }.onFailure { error ->
+        logger.e(error) { "Ошибка смены пароля для '$username': ${error.message}" }
     }
 
     suspend fun deleteUser(username: String): Result<Unit> = runCatching {
@@ -356,6 +373,21 @@ class KordClient(
         mapper.toScanStatus(dto)
     }.onFailure { error ->
         logger.w { "Ошибка проверки статуса сканирования: ${error.message}" }
+    }
+
+    suspend fun getNowPlaying(): Result<List<NowPlayingItem>> = runCatching {
+        val response = executeKordinatorRequest("getNowPlaying", emptyList()).getOrThrow()
+        response.nowPlaying?.entry?.map { mapper.toNowPlayingItem(it) } ?: emptyList()
+    }.onFailure { error ->
+        logger.w { "Ошибка получения списка 'Сейчас слушают': ${error.message}" }
+    }
+
+    suspend fun getServerHealth(): Result<ServerHealthInfo> = runCatching {
+        val response = executeKordinatorRequest("getServerHealth", emptyList()).getOrThrow()
+        val dto = response.serverHealth ?: error("Отсутствует serverHealth в ответе")
+        mapper.toServerHealthInfo(dto)
+    }.onFailure { error ->
+        logger.w { "Ошибка получения состояния здоровья сервера: ${error.message}" }
     }
 
     private fun extractErrorMessage(body: String): String? {

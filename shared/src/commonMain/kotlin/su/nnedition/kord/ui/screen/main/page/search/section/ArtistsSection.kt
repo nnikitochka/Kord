@@ -39,7 +39,7 @@ fun ArtistsSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             artists.forEach { artist ->
-                su.nnedition.kord.ui.screen.main.page.search.SearchArtistCard(
+                SearchArtistCard(
                     artist = artist,
                     onClick = { onArtistClick(artist) }
                 )

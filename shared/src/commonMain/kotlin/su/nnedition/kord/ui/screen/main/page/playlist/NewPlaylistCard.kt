@@ -112,5 +112,5 @@ fun NewPlaylistCard(
 @Preview
 @Composable
 private fun NewPlaylistCardPreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.NewPlaylistCard(onClick = {})
+    NewPlaylistCard(onClick = {})
 }

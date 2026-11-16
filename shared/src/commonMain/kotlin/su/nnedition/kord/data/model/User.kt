@@ -8,5 +8,6 @@ data class User(
     val canDownload: Boolean = false,
     val canUpload: Boolean = false,
     val canSettings: Boolean = false,
-    val allowedFolderIds: List<Int> = emptyList()
+    val allowedFolderIds: List<Int> = emptyList(),
+    val maxBitRate: Int? = null
 )

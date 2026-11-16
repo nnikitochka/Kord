@@ -42,9 +42,6 @@ import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.player.PlayerState
 import su.nnedition.kord.ui.screen.common.Page
-import su.nnedition.kord.ui.screen.main.page.search.section.AlbumsSection
-import su.nnedition.kord.ui.screen.main.page.search.section.ArtistsSection
-import su.nnedition.kord.ui.screen.main.page.search.section.TracksSection
 import kotlin.time.Duration.Companion.milliseconds
 
 object SearchPage : Page {
@@ -60,7 +57,7 @@ object SearchPage : Page {
         val playerState by player.state.collectAsState()
 
         var query by remember { mutableStateOf("") }
-        var selectedCategory by remember { mutableStateOf(su.nnedition.kord.ui.screen.main.page.search.SearchCategory.TOP) }
+        var selectedCategory by remember { mutableStateOf(SearchCategory.TOP) }
         var searchResult by remember { mutableStateOf<SearchResult?>(null) }
         var isLoading by remember { mutableStateOf(false) }
         var trackPage by remember { mutableIntStateOf(0) }
@@ -92,7 +89,7 @@ object SearchPage : Page {
                 .padding(16.dp)
         ) {
             // 1. Search Input Bar
-            su.nnedition.kord.ui.screen.main.page.search.SearchInputBar(
+            SearchInputBar(
                 query = query,
                 onQueryChange = { query = it },
                 onClear = {
@@ -109,7 +106,7 @@ object SearchPage : Page {
             ) {
                 Column {
                     Spacer(modifier = Modifier.height(12.dp))
-                    su.nnedition.kord.ui.screen.main.page.search.SearchCategoryChips(
+                    SearchCategoryChips(
                         selectedCategory = selectedCategory,
                         onCategorySelected = { selectedCategory = it }
                     )
@@ -181,7 +178,7 @@ object SearchPage : Page {
                             verticalArrangement = Arrangement.spacedBy(24.dp)
                         ) {
                             when (selectedCategory) {
-                                su.nnedition.kord.ui.screen.main.page.search.SearchCategory.TOP -> {
+                                SearchCategory.TOP -> {
                                     // TOP: Tracks Block (2 columns)
                                     if (result.tracks.isNotEmpty()) {
                                         item {
@@ -227,7 +224,7 @@ object SearchPage : Page {
                                     }
                                 }
 
-                                su.nnedition.kord.ui.screen.main.page.search.SearchCategory.TRACKS -> {
+                                SearchCategory.TRACKS -> {
                                     item {
                                         Text(
                                             text = "Все треки (${result.tracks.size})",
@@ -246,7 +243,7 @@ object SearchPage : Page {
                                             Box(modifier = Modifier.weight(1f)) {
                                                 val track = pair[0]
                                                 val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
-                                                su.nnedition.kord.ui.screen.main.page.search.SearchTrackGridItem(
+                                                SearchTrackGridItem(
                                                     track = track,
                                                     isPlaying = isPlaying,
                                                     onClick = {
@@ -263,7 +260,7 @@ object SearchPage : Page {
                                                 Box(modifier = Modifier.weight(1f)) {
                                                     val track = pair[1]
                                                     val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
-                                                    su.nnedition.kord.ui.screen.main.page.search.SearchTrackGridItem(
+                                                    SearchTrackGridItem(
                                                         track = track,
                                                         isPlaying = isPlaying,
                                                         onClick = {
@@ -282,7 +279,7 @@ object SearchPage : Page {
                                     }
                                 }
 
-                                su.nnedition.kord.ui.screen.main.page.search.SearchCategory.ALBUMS -> {
+                                SearchCategory.ALBUMS -> {
                                     item {
                                         Text(
                                             text = "Все альбомы (${result.albums.size})",
@@ -299,7 +296,7 @@ object SearchPage : Page {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             albumRow.forEach { album ->
-                                                su.nnedition.kord.ui.screen.main.page.search.SearchAlbumCard(
+                                                SearchAlbumCard(
                                                     album = album,
                                                     onClick = {}
                                                 )
@@ -308,7 +305,7 @@ object SearchPage : Page {
                                     }
                                 }
 
-                                su.nnedition.kord.ui.screen.main.page.search.SearchCategory.ARTISTS -> {
+                                SearchCategory.ARTISTS -> {
                                     item {
                                         Text(
                                             text = "Все исполнители (${result.artists.size})",
@@ -325,7 +322,7 @@ object SearchPage : Page {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             artistRow.forEach { artist ->
-                                                su.nnedition.kord.ui.screen.main.page.search.SearchArtistCard(
+                                                SearchArtistCard(
                                                     artist = artist,
                                                     onClick = {}
                                                 )
@@ -345,5 +342,5 @@ object SearchPage : Page {
 @Preview
 @Composable
 private fun SearchPagePreview() {
-    su.nnedition.kord.ui.screen.main.page.search.SearchPage.Content(modifier = Modifier.fillMaxSize())
+    SearchPage.Content(modifier = Modifier.fillMaxSize())
 }

@@ -63,16 +63,6 @@ fun SearchTrackGridItem(
         animationSpec = tween(durationMillis = 150)
     )
 
-    val defaultGradient = remember(track.id) {
-        val hues = listOf(
-            listOf(Color(0xFF3182CE), Color(0xFF63B3ED)),
-            listOf(Color(0xFFDD6B20), Color(0xFFF6AD55)),
-            listOf(Color(0xFF38A169), Color(0xFF68D391)),
-            listOf(Color(0xFF805AD5), Color(0xFFB794F4))
-        )
-        hues[(track.id.hashCode() and 0x7FFFFFFF) % hues.size]
-    }
-
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -180,7 +170,7 @@ fun SearchTrackGridItem(
 @Composable
 private fun SearchTrackGridItemPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        su.nnedition.kord.ui.screen.main.page.search.SearchTrackGridItem(
+        SearchTrackGridItem(
             track = Track(
                 id = "1",
                 title = "42",

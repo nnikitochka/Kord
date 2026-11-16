@@ -18,5 +18,6 @@ data class UserDto(
     val streamRole: Boolean = false,
     val jukeboxRole: Boolean = false,
     val shareRole: Boolean = false,
-    val videoConversionRole: Boolean = false
+    val videoConversionRole: Boolean = false,
+    val maxBitRate: Int? = null
 )

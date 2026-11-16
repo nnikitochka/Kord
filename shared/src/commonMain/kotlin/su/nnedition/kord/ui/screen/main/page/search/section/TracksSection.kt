@@ -83,7 +83,8 @@ fun TracksSection(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = "Следующая страница",
-                            tint = if (safePage < maxPages - 1) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            tint = if (safePage < maxPages - 1) MaterialTheme.colorScheme.onSurface
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -103,7 +104,7 @@ fun TracksSection(
                 Box(modifier = Modifier.weight(1f)) {
                     val track = pair[0]
                     val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
-                    su.nnedition.kord.ui.screen.main.page.search.SearchTrackGridItem(
+                    SearchTrackGridItem(
                         track = track,
                         isPlaying = isPlaying,
                         onClick = { onTrackClick(track) }
@@ -114,7 +115,7 @@ fun TracksSection(
                     Box(modifier = Modifier.weight(1f)) {
                         val track = pair[1]
                         val isPlaying = currentTrack?.id == track.id && playerState == PlayerState.PLAYING
-                        su.nnedition.kord.ui.screen.main.page.search.SearchTrackGridItem(
+                        SearchTrackGridItem(
                             track = track,
                             isPlaying = isPlaying,
                             onClick = { onTrackClick(track) }

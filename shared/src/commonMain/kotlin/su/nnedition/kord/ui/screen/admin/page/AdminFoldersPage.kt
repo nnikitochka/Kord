@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Sync
@@ -26,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,9 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -106,7 +110,7 @@ object AdminFoldersPage : Page {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Управление источниками музыки и переиндексация",
+                        text = "Управление источниками музыки, путями и переиндексация",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -117,7 +121,79 @@ object AdminFoldersPage : Page {
                 }
             }
 
-            // Карточка статуса сканирования
+            // Статистика медиатеки
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Card(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Папок на сервере",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${folders.size}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Треков в индексе",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${scanStatus?.scannedCount ?: 0L}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+
+                Card(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = "Статус сканера",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = if (isScanning) "Индексация..." else "Готов к работе",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isScanning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+
+            // Карточка управления сканированием
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -160,50 +236,75 @@ object AdminFoldersPage : Page {
 
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
-                                text = if (isScanning) "Идёт сканирование медиатеки..." else "Статус сканирования",
+                                text = if (isScanning) "Идёт сканирование медиатеки..." else "Запуск индексации",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             val count = scanStatus?.scannedCount ?: 0L
                             Text(
                                 text = if (isScanning) "Обработано файлов: $count"
-                                else if (count > 0L) "Всего файлов в индексе: $count"
-                                else "Сканирование не запущено",
+                                else "Обновление списка треков, альбомов и тегов",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
 
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                isScanning = true
-                                KordClient.default.startScan().onSuccess {
-                                    scanStatus = it
-                                    isScanning = it.isScanning
-                                }.onFailure {
-                                    isScanning = false
-                                    message = it.message
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    isScanning = true
+                                    KordClient.default.startScan().onSuccess {
+                                        scanStatus = it
+                                        isScanning = it.isScanning
+                                    }.onFailure {
+                                        isScanning = false
+                                        message = it.message
+                                    }
                                 }
-                            }
-                        },
-                        enabled = !isScanning
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.size(6.dp))
-                        Text(if (isScanning) "Сканируется..." else "Запустить сканирование")
+                            },
+                            enabled = !isScanning
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.size(6.dp))
+                            Text(if (isScanning) "Сканируется..." else "Быстрое сканирование")
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                scope.launch {
+                                    isScanning = true
+                                    KordClient.default.startScan().onSuccess {
+                                        scanStatus = it
+                                        isScanning = it.isScanning
+                                    }.onFailure {
+                                        isScanning = false
+                                        message = it.message
+                                    }
+                                }
+                            },
+                            enabled = !isScanning
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.size(6.dp))
+                            Text("Полное сканирование")
+                        }
                     }
                 }
             }
 
             // Список музыкальных папок
             Text(
-                text = "Подключённые папки",
+                text = "Подключённые директории хранения",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -224,7 +325,7 @@ object AdminFoldersPage : Page {
                     )
                 ) {
                     Text(
-                        text = "Музыкальные папки не обнаружены на сервере",
+                        text = "Музыкальные папки не настроены на сервере",
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -251,7 +352,7 @@ object AdminFoldersPage : Page {
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(40.dp)
+                                        .size(44.dp)
                                         .clip(CircleShape)
                                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)),
                                     contentAlignment = Alignment.Center
@@ -260,19 +361,39 @@ object AdminFoldersPage : Page {
                                         imageVector = Icons.Default.Folder,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(22.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
 
-                                Column {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text = folder.name,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Text(
+                                            text = "ID: ${folder.id}",
+                                            fontSize = 11.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+
+                                    val displayPath = folder.path ?: "Локальная папка библиотеки сервера"
                                     Text(
-                                        text = folder.name,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Text(
-                                        text = "ID: ${folder.id}",
-                                        style = MaterialTheme.typography.bodySmall,
+                                        text = displayPath,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }

@@ -54,6 +54,7 @@ object AdminUsersPage : Page {
         var errorMessage by remember { mutableStateOf<String?>(null) }
         var showCreateDialog by remember { mutableStateOf(false) }
         var userToDelete by remember { mutableStateOf<User?>(null) }
+        var userToChangePassword by remember { mutableStateOf<User?>(null) }
 
         fun loadUsers() {
             scope.launch {
@@ -94,7 +95,7 @@ object AdminUsersPage : Page {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Управление учётными записями и правами доступа",
+                        text = "Управление учётными записями, ролями и паролями",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -158,7 +159,8 @@ object AdminUsersPage : Page {
                     items(users, key = { it.username }) { user ->
                         AdminUserItem(
                             user = user,
-                            onDeleteClick = { userToDelete = it }
+                            onDeleteClick = { userToDelete = it },
+                            onChangePasswordClick = { userToChangePassword = it }
                         )
                     }
                 }
@@ -168,7 +170,7 @@ object AdminUsersPage : Page {
         if (showCreateDialog) {
             AdminCreateUserDialog(
                 onDismissRequest = { showCreateDialog = false },
-                onConfirm = { username, password, email, isAdmin, canStream, canDownload ->
+                onConfirm = { username, password, email, isAdmin, canStream, canDownload, canUpload, maxBitRate ->
                     scope.launch {
                         KordClient.default.createUser(
                             username = username,
@@ -176,13 +178,31 @@ object AdminUsersPage : Page {
                             email = email,
                             adminRole = isAdmin,
                             streamRole = canStream,
-                            downloadRole = canDownload
+                            downloadRole = canDownload,
+                            uploadRole = canUpload,
+                            maxBitRate = maxBitRate
                         ).onSuccess {
                             showCreateDialog = false
                             loadUsers()
                         }.onFailure {
                             errorMessage = it.message ?: "Ошибка создания пользователя"
                         }
+                    }
+                }
+            )
+        }
+
+        userToChangePassword?.let { user ->
+            AdminChangePasswordDialog(
+                username = user.username,
+                onDismissRequest = { userToChangePassword = null },
+                onConfirm = { newPass ->
+                    val target = user.username
+                    userToChangePassword = null
+                    scope.launch {
+                        KordClient.default.changePassword(target, newPass)
+                            .onSuccess { loadUsers() }
+                            .onFailure { errorMessage = it.message }
                     }
                 }
             )

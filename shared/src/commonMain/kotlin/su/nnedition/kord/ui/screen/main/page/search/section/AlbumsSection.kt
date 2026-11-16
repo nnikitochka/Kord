@@ -39,7 +39,7 @@ fun AlbumsSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             albums.forEach { album ->
-                su.nnedition.kord.ui.screen.main.page.search.SearchAlbumCard(
+                SearchAlbumCard(
                     album = album,
                     onClick = { onAlbumClick(album) }
                 )

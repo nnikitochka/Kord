@@ -55,17 +55,6 @@ fun SearchAlbumCard(
         animationSpec = tween(durationMillis = 150)
     )
 
-    val defaultGradient = remember(album.id) {
-        val hues = listOf(
-            listOf(Color(0xFF2B6CB0), Color(0xFF4299E1)),
-            listOf(Color(0xFFC53030), Color(0xFFF56565)),
-            listOf(Color(0xFF2F855A), Color(0xFF48BB78)),
-            listOf(Color(0xFF6B46C1), Color(0xFF9F7AEA)),
-            listOf(Color(0xFFD69E2E), Color(0xFFECC94B))
-        )
-        hues[(album.id.hashCode() and 0x7FFFFFFF) % hues.size]
-    }
-
     Column(
         modifier = modifier
             .width(140.dp)
@@ -146,7 +135,7 @@ fun SearchAlbumCard(
 @Composable
 private fun SearchAlbumCardPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        su.nnedition.kord.ui.screen.main.page.search.SearchAlbumCard(
+        SearchAlbumCard(
             album = Album(
                 id = "1",
                 title = "NEXT LEVEL",

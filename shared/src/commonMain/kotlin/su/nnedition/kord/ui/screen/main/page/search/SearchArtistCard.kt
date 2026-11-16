@@ -56,16 +56,6 @@ fun SearchArtistCard(
         animationSpec = tween(durationMillis = 150)
     )
 
-    val defaultGradient = remember(artist.id) {
-        val hues = listOf(
-            listOf(Color(0xFF805AD5), Color(0xFFD53F8C)),
-            listOf(Color(0xFF319795), Color(0xFF4FD1C5)),
-            listOf(Color(0xFFDD6B20), Color(0xFFF6AD55)),
-            listOf(Color(0xFF3182CE), Color(0xFF63B3ED))
-        )
-        hues[(artist.id.hashCode() and 0x7FFFFFFF) % hues.size]
-    }
-
     Column(
         modifier = modifier
             .width(130.dp)
@@ -144,7 +134,7 @@ fun SearchArtistCard(
 @Composable
 private fun SearchArtistCardPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        su.nnedition.kord.ui.screen.main.page.search.SearchArtistCard(
+        SearchArtistCard(
             artist = Artist(
                 id = "1",
                 name = "Neverlove"

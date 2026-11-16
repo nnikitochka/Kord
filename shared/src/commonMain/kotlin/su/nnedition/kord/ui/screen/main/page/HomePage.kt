@@ -32,5 +32,5 @@ object HomePage : Page {
 @Preview
 @Composable
 private fun HomePagePreview() {
-    su.nnedition.kord.ui.screen.main.page.HomePage.Content(modifier = Modifier.fillMaxSize())
+    HomePage.Content(modifier = Modifier.fillMaxSize())
 }

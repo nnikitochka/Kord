@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.ui.component.image.CoverImage
-import su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients
 import su.nnedition.kord.util.TimeFormatter
 
 @Composable
@@ -36,11 +34,6 @@ fun PlaylistDetailHeader(
     onPlayAll: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gradient = remember(playlist.id) {
-        val idx = (playlist.id.hashCode() and 0x7FFFFFFF) % su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients.size
-        su.nnedition.kord.ui.screen.main.page.playlist.PlaylistsPage.playlistGradients[idx]
-    }
-
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Bottom,
@@ -108,7 +101,7 @@ fun PlaylistDetailHeader(
 @Preview
 @Composable
 private fun PlaylistDetailHeaderPreview() {
-    su.nnedition.kord.ui.screen.main.page.playlist.detail.PlaylistDetailHeader(
+    PlaylistDetailHeader(
         playlist = Playlist(
             id = "preview_1",
             name = "Любимые треки",

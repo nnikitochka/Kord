@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SearchCategoryChips(
-    selectedCategory: su.nnedition.kord.ui.screen.main.page.search.SearchCategory,
-    onCategorySelected: (su.nnedition.kord.ui.screen.main.page.search.SearchCategory) -> Unit,
+    selectedCategory: SearchCategory,
+    onCategorySelected: (SearchCategory) -> Unit,
     modifier: Modifier = Modifier,
-    categories: List<su.nnedition.kord.ui.screen.main.page.search.SearchCategory> = su.nnedition.kord.ui.screen.main.page.search.SearchCategory.entries
+    categories: List<SearchCategory> = SearchCategory.entries
 ) {
     val scrollState = rememberScrollState()
 
@@ -107,8 +107,8 @@ fun SearchCategoryChips(
 @Composable
 private fun SearchCategoryChipsPreview() {
     Box(modifier = Modifier.padding(16.dp)) {
-        su.nnedition.kord.ui.screen.main.page.search.SearchCategoryChips(
-            selectedCategory = su.nnedition.kord.ui.screen.main.page.search.SearchCategory.TOP,
+        SearchCategoryChips(
+            selectedCategory = SearchCategory.TOP,
             onCategorySelected = {}
         )
     }

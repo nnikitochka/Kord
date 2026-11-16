@@ -3,10 +3,13 @@ package su.nnedition.kord.data.remote.mapper
 import su.nnedition.kord.data.model.Album
 import su.nnedition.kord.data.model.Artist
 import su.nnedition.kord.data.model.MusicFolder
+import su.nnedition.kord.data.model.NowPlayingItem
 import su.nnedition.kord.data.model.PlayQueue
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.model.SearchResult
+import su.nnedition.kord.data.model.ServerHealthComponent
+import su.nnedition.kord.data.model.ServerHealthInfo
 import su.nnedition.kord.data.model.Track
 import su.nnedition.kord.data.model.User
 import su.nnedition.kord.data.remote.ServerConfig
@@ -15,11 +18,13 @@ import su.nnedition.kord.data.remote.dto.AlbumDto
 import su.nnedition.kord.data.remote.dto.ArtistDetailDto
 import su.nnedition.kord.data.remote.dto.ArtistDto
 import su.nnedition.kord.data.remote.dto.MusicFolderDto
+import su.nnedition.kord.data.remote.dto.NowPlayingEntryDto
 import su.nnedition.kord.data.remote.dto.PlayQueueDto
 import su.nnedition.kord.data.remote.dto.PlaylistDetailDto
 import su.nnedition.kord.data.remote.dto.PlaylistDto
 import su.nnedition.kord.data.remote.dto.ScanStatusDto
 import su.nnedition.kord.data.remote.dto.SearchResult3Dto
+import su.nnedition.kord.data.remote.dto.ServerHealthDto
 import su.nnedition.kord.data.remote.dto.SongDto
 import su.nnedition.kord.data.remote.dto.UserDto
 
@@ -159,14 +164,16 @@ class KordinatorMapper(
             canDownload = dto.downloadRole,
             canUpload = dto.uploadRole,
             canSettings = dto.settingsRole,
-            allowedFolderIds = emptyList()
+            allowedFolderIds = emptyList(),
+            maxBitRate = dto.maxBitRate
         )
     }
 
     fun toMusicFolder(dto: MusicFolderDto): MusicFolder {
         return MusicFolder(
             id = dto.id,
-            name = dto.name
+            name = dto.name,
+            path = dto.path
         )
     }
 
@@ -174,6 +181,34 @@ class KordinatorMapper(
         return ScanStatus(
             isScanning = dto.scanning,
             scannedCount = dto.count
+        )
+    }
+
+    fun toNowPlayingItem(dto: NowPlayingEntryDto): NowPlayingItem {
+        return NowPlayingItem(
+            username = dto.username ?: "Неизвестный",
+            title = dto.title ?: "Без названия",
+            artist = dto.artist ?: "Неизвестный исполнитель",
+            album = dto.album ?: "",
+            playerName = dto.playerName ?: "Клиент",
+            minutesAgo = dto.minutesAgo ?: 0,
+            coverArtUrl = dto.coverArt?.let { getCoverArtUrl(it) }
+        )
+    }
+
+    fun toServerHealthInfo(dto: ServerHealthDto): ServerHealthInfo {
+        val isUp = dto.status.equals("UP", ignoreCase = true)
+        val components = dto.component.map { comp ->
+            ServerHealthComponent(
+                name = comp.name,
+                status = comp.status,
+                isUp = comp.status.equals("UP", ignoreCase = true)
+            )
+        }
+        return ServerHealthInfo(
+            status = dto.status,
+            isUp = isUp,
+            components = components
         )
     }
 

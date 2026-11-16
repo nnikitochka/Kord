@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -40,7 +40,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import su.nnedition.kord.data.model.NowPlayingItem
+import su.nnedition.kord.data.model.ServerHealthInfo
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.ui.screen.common.Page
 
@@ -56,22 +60,31 @@ object AdminServerPage : Page {
 
         var isPinging by remember { mutableStateOf(false) }
         var isOnline by remember { mutableStateOf<Boolean?>(null) }
+        var serverHealth by remember { mutableStateOf<ServerHealthInfo?>(null) }
+        var nowPlayingList by remember { mutableStateOf<List<NowPlayingItem>>(emptyList()) }
 
-        fun checkPing() {
+        fun loadTelemetry() {
             scope.launch {
                 isPinging = true
                 isOnline = client.ping()
+                client.getServerHealth().onSuccess { serverHealth = it }
+                client.getNowPlaying().onSuccess { nowPlayingList = it }
                 isPinging = false
             }
         }
 
         LaunchedEffect(Unit) {
-            checkPing()
+            loadTelemetry()
+            while (isActive) {
+                delay(10000L)
+                client.getNowPlaying().onSuccess { nowPlayingList = it }
+            }
         }
 
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -87,17 +100,18 @@ object AdminServerPage : Page {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Параметры соединения и статус бэкенда",
+                        text = "Параметры соединения, диагностика компонентов и активные стримы",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                IconButton(onClick = { checkPing() }, enabled = !isPinging) {
+                IconButton(onClick = { loadTelemetry() }, enabled = !isPinging) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Проверить статус")
                 }
             }
 
+            // Основная карточка соединения
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -159,33 +173,20 @@ object AdminServerPage : Page {
                     Spacer(modifier = Modifier.size(4.dp))
 
                     Button(
-                        onClick = { checkPing() },
+                        onClick = { loadTelemetry() },
                         enabled = !isPinging
                     ) {
-                        Text("Повторить пинг")
+                        Text("Повторить пинг и обновить данные")
                     }
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun ServerParamRow(title: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium
-        )
+            // Карточка здоровья компонентов
+            ServerHealthCard(health = serverHealth)
+
+            // Карточка "Сейчас слушают"
+            NowPlayingCard(items = nowPlayingList)
+        }
     }
 }
 
