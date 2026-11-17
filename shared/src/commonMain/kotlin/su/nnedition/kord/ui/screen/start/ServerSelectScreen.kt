@@ -49,13 +49,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import kord.shared.generated.resources.Res
 import kord.shared.generated.resources.visibility
 import kord.shared.generated.resources.visibility_off
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
-import co.touchlab.kermit.Logger
 import su.nnedition.kord.service.AuthService
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -89,15 +89,20 @@ fun ServerSelectScreen(
             return@LaunchedEffect
         }
 
-        // Быстрый дебаунс при вводе
-        delay(250.milliseconds)
+        delay(400.milliseconds)
 
         pingState = ServerPingState.CHECKING
 
-        val targetBase = "$protocol$trimmed".trimEnd('/')
-        val isReachable = authService.ping(targetBase)
-
-        pingState = if (isReachable) ServerPingState.SUCCESS else ServerPingState.FAILED
+        try {
+            val targetBase = "$protocol$trimmed".trimEnd('/')
+            val isReachable = authService.ping(targetBase)
+            pingState = if (isReachable) ServerPingState.SUCCESS else ServerPingState.FAILED
+        } catch (ce: kotlinx.coroutines.CancellationException) {
+            throw ce
+        } catch (t: Throwable) {
+            logger.w(t) { "Ошибка пинга: ${t.message}" }
+            pingState = ServerPingState.FAILED
+        }
     }
 
     Box(
@@ -163,13 +168,17 @@ fun ServerSelectScreen(
                         value = serverAddress,
                         onValueChange = { input ->
                             errorMessage = null
-                            if (input.startsWith("https://", ignoreCase = true)) {
+                            val trimmed = input.trim()
+                            if (trimmed.startsWith("https://", ignoreCase = true)) {
                                 protocol = "https://"
-                                serverAddress = input.substring(8)
-                            } else if (input.startsWith("http://", ignoreCase = true)) {
+                                serverAddress = trimmed.substring(8)
+                            } else if (trimmed.startsWith("http://", ignoreCase = true)) {
                                 protocol = "http://"
-                                serverAddress = input.substring(7)
+                                serverAddress = trimmed.substring(7)
                             } else {
+                                if (protocol == "https://" && (trimmed.startsWith("192.168.") || trimmed.startsWith("10.") || trimmed.startsWith("127.") || trimmed.startsWith("localhost"))) {
+                                    protocol = "http://"
+                                }
                                 serverAddress = input
                             }
                         },

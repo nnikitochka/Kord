@@ -2,8 +2,10 @@ package su.nnedition.kord.data.remote
 
 import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.encodeURLParameter
@@ -35,6 +37,11 @@ class KordClient(
     val logger = Logger.withTag("KordClient")
 
     val httpClient = HttpClient {
+        install(HttpTimeout) {
+            requestTimeoutMillis = 15000
+            connectTimeoutMillis = 3000
+            socketTimeoutMillis = 15000
+        }
         install(Logging) {
             logger = KermitKtorLogger("KordHttpClient")
             level = LogLevel.ALL
@@ -81,28 +88,20 @@ class KordClient(
         if (targetBase.isEmpty()) return false
 
         val pingUrl = "$targetBase/rest/ping?v=1.15.0&c=kord&f=json"
-        logger.d { "Пинг сервера: $pingUrl" }
-
-        return withTimeoutOrNull(4000L.milliseconds) {
-            try {
-                val resp = httpClient.get(pingUrl)
-                val ok = resp.status.value in 200..499
-                logger.d { "Результат пинга $pingUrl: HTTP ${resp.status.value} ($ok)" }
-                ok
-            } catch (e: Exception) {
-                logger.w { "Ошибка пинга $pingUrl: ${e.message}, пробуем корень $targetBase" }
-                try {
-                    val rootResp = httpClient.get(targetBase)
-                    val ok = rootResp.status.value in 200..499
-                    logger.d { "Результат пинга корня $targetBase: HTTP ${rootResp.status.value} ($ok)" }
-                    ok
-                } catch (e2: Exception) {
-                    logger.w { "Корень $targetBase недоступен: ${e2.message}" }
-                    false
+        return try {
+            val resp = httpClient.get(pingUrl) {
+                timeout {
+                    connectTimeoutMillis = 1500
+                    requestTimeoutMillis = 2000
+                    socketTimeoutMillis = 2000
                 }
             }
-        } ?: run {
-            logger.w { "Таймаут пинга для $targetBase" }
+            val ok = resp.status.value in 200..499
+            resp.bodyAsText()
+            ok
+        } catch (ce: kotlinx.coroutines.CancellationException) {
+            throw ce
+        } catch (t: Throwable) {
             false
         }
     }
