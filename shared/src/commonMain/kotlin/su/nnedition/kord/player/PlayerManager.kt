@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import su.nnedition.kord.data.remote.KordClient
+import kotlin.time.Duration.Companion.milliseconds
 
 object PlayerManager {
     val instance: AudioPlayer by lazy { createAudioPlayer() }
@@ -43,7 +44,7 @@ object PlayerManager {
         // Periodic sync every 15 seconds during active playback
         scope.launch {
             while (isActive) {
-                delay(15_000L)
+                delay(15_000L.milliseconds)
                 if (!isRestoring.value && instance.state.value == PlayerState.PLAYING) {
                     saveQueue()
                 }
@@ -77,7 +78,7 @@ object PlayerManager {
                     logger.w { "Не удалось получить очередь воспроизведения с сервера: ${error.message}" }
                 }
             } finally {
-                delay(500L)
+                delay(500L.milliseconds)
                 isRestoring.value = false
             }
         }

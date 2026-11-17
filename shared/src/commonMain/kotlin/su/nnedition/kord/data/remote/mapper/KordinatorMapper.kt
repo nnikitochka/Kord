@@ -174,7 +174,7 @@ class KordinatorMapper(
         return User(
             username = dto.username,
             email = dto.email,
-            isAdmin = dto.adminRole || dto.username.equals("admin", ignoreCase = true),
+            isAdmin = dto.adminRole,
             canStream = dto.streamRole,
             canDownload = dto.downloadRole,
             canUpload = dto.uploadRole,

@@ -26,7 +26,7 @@ fun MainViewScreen(
     onNavigateToAdmin: () -> Unit = { AppNavigator.default.navigateTo(AdminPanelRoute) }
 ) {
     val currentSession by AuthService.default.currentSession.collectAsState()
-    val isAdmin = currentSession?.isAdmin == true || currentSession?.username.equals("admin", ignoreCase = true)
+    val isAdmin = currentSession?.isAdmin == true
 
     CommonViewScreen(
         topPages = topPages,

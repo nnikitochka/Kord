@@ -29,7 +29,7 @@ class AuthService(
 
             // Проверяем роль администратора
             val userResult = remoteClient.getUser(username)
-            val isAdmin = username.equals("admin", ignoreCase = true) || (userResult.getOrNull()?.isAdmin == true)
+            val isAdmin = userResult.getOrNull()?.isAdmin == true
             logger.i { "Права пользователя '$username': isAdmin = $isAdmin" }
 
             val session = UserSession(
@@ -49,13 +49,8 @@ class AuthService(
     }
 
     fun restoreSession(): UserSession? {
-        val rawSession = authRepository.getSession()
-        if (rawSession != null) {
-            val isAdmin = rawSession.isAdmin || rawSession.username.equals("admin", ignoreCase = true)
-            val session = if (rawSession.isAdmin != isAdmin) rawSession.copy(isAdmin = isAdmin) else rawSession
-            if (session != rawSession) {
-                authRepository.saveSession(session)
-            }
+        val session = authRepository.getSession()
+        if (session != null) {
             logger.i { "Восстановлена сохранённая сессия для '${session.username}' (isAdmin=${session.isAdmin})" }
             remoteClient.setSession(session.serverUrl, session.username, session.token)
             _currentSession.value = session
@@ -70,7 +65,7 @@ class AuthService(
     suspend fun refreshUserRole() {
         val session = _currentSession.value ?: return
         remoteClient.getUser(session.username).onSuccess { user ->
-            val effectiveAdmin = user.isAdmin || session.username.equals("admin", ignoreCase = true)
+            val effectiveAdmin = user.isAdmin
             if (effectiveAdmin != session.isAdmin) {
                 val updated = session.copy(isAdmin = effectiveAdmin)
                 authRepository.saveSession(updated)

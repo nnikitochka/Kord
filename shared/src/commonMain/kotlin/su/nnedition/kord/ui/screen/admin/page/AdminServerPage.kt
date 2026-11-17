@@ -47,6 +47,7 @@ import su.nnedition.kord.data.model.NowPlayingItem
 import su.nnedition.kord.data.model.ServerHealthInfo
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.ui.screen.common.Page
+import kotlin.time.Duration.Companion.milliseconds
 
 object AdminServerPage : Page {
     override val title: String = "Сервер"
@@ -76,7 +77,7 @@ object AdminServerPage : Page {
         LaunchedEffect(Unit) {
             loadTelemetry()
             while (isActive) {
-                delay(10000L)
+                delay(10000L.milliseconds)
                 client.getNowPlaying().onSuccess { nowPlayingList = it }
             }
         }

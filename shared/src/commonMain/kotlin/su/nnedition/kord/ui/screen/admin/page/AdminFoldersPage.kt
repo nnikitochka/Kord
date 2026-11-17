@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Sync
@@ -52,6 +51,7 @@ import su.nnedition.kord.data.model.MusicFolder
 import su.nnedition.kord.data.model.ScanStatus
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.ui.screen.common.Page
+import kotlin.time.Duration.Companion.milliseconds
 
 object AdminFoldersPage : Page {
     override val title: String = "Медиатека"
@@ -84,7 +84,7 @@ object AdminFoldersPage : Page {
 
         LaunchedEffect(isScanning) {
             while (isActive && isScanning) {
-                delay(2000L)
+                delay(2000L.milliseconds)
                 KordClient.default.getScanStatus().onSuccess {
                     scanStatus = it
                     isScanning = it.isScanning
