@@ -19,6 +19,7 @@ import su.nnedition.kord.ui.navigation.MainRoute
 import su.nnedition.kord.ui.navigation.ServerSelectRoute
 import su.nnedition.kord.ui.screen.admin.AdminPanelScreen
 import su.nnedition.kord.ui.screen.main.MainViewScreen
+import su.nnedition.kord.ui.screen.shell.AppShellScreen
 import su.nnedition.kord.ui.screen.start.ServerSelectScreen
 
 private val imageHttpClient by lazy { HttpClient() }
@@ -60,10 +61,7 @@ fun KordApp(
                     PlayerManager.restoreQueue()
                 }
             )
-            MainRoute -> MainViewScreen()
-            AdminPanelRoute -> AdminPanelScreen(
-                onBack = { navigator.pop() }
-            )
+            else -> AppShellScreen()
         }
     }
 }

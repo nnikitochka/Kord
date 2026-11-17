@@ -42,6 +42,9 @@ import su.nnedition.kord.data.model.SearchResult
 import su.nnedition.kord.data.remote.KordClient
 import su.nnedition.kord.player.PlayerManager
 import su.nnedition.kord.player.PlayerState
+import su.nnedition.kord.ui.navigation.AlbumDetailRoute
+import su.nnedition.kord.ui.navigation.ArtistDetailRoute
+import su.nnedition.kord.ui.navigation.LocalNavController
 import su.nnedition.kord.ui.screen.common.Page
 import su.nnedition.kord.ui.screen.main.page.detail.AlbumDetailsPage
 import su.nnedition.kord.ui.screen.main.page.detail.ArtistDetailsPage
@@ -55,6 +58,7 @@ object SearchPage : Page {
     override fun Content(modifier: Modifier) {
         val client = remember { KordClient.default }
         val player = remember { PlayerManager.instance }
+        val navController = LocalNavController.current
 
         val currentTrack by player.currentTrack.collectAsState()
         val playerState by player.state.collectAsState()
@@ -238,7 +242,11 @@ object SearchPage : Page {
                                             su.nnedition.kord.ui.screen.main.page.search.section.AlbumsSection(
                                                 albums = result.albums,
                                                 onAlbumClick = { album ->
-                                                    selectedAlbumId = album.id
+                                                    if (navController != null) {
+                                                        navController.navigate(AlbumDetailRoute(album.id))
+                                                    } else {
+                                                        selectedAlbumId = album.id
+                                                    }
                                                 }
                                             )
                                         }
@@ -250,7 +258,11 @@ object SearchPage : Page {
                                             su.nnedition.kord.ui.screen.main.page.search.section.ArtistsSection(
                                                 artists = result.artists,
                                                 onArtistClick = { artist ->
-                                                    selectedArtistId = artist.id
+                                                    if (navController != null) {
+                                                        navController.navigate(ArtistDetailRoute(artist.id))
+                                                    } else {
+                                                        selectedArtistId = artist.id
+                                                    }
                                                 }
                                             )
                                         }
@@ -332,7 +344,11 @@ object SearchPage : Page {
                                                 SearchAlbumCard(
                                                     album = album,
                                                     onClick = {
-                                                        selectedAlbumId = album.id
+                                                        if (navController != null) {
+                                                            navController.navigate(AlbumDetailRoute(album.id))
+                                                        } else {
+                                                            selectedAlbumId = album.id
+                                                        }
                                                     }
                                                 )
                                             }
@@ -360,7 +376,11 @@ object SearchPage : Page {
                                                 SearchArtistCard(
                                                     artist = artist,
                                                     onClick = {
-                                                        selectedArtistId = artist.id
+                                                        if (navController != null) {
+                                                            navController.navigate(ArtistDetailRoute(artist.id))
+                                                        } else {
+                                                            selectedArtistId = artist.id
+                                                        }
                                                     }
                                                 )
                                             }

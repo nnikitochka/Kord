@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import su.nnedition.kord.data.model.Playlist
 import su.nnedition.kord.data.remote.KordClient
+import su.nnedition.kord.ui.navigation.LocalNavController
+import su.nnedition.kord.ui.navigation.PlaylistDetailRoute
 import su.nnedition.kord.ui.screen.common.Page
 import su.nnedition.kord.ui.screen.main.page.detail.playlist.PlaylistDetailView
 
@@ -70,6 +72,7 @@ object PlaylistsPage : Page {
     override fun Content(modifier: Modifier) {
         val client = remember { KordClient.default }
         val coroutineScope = rememberCoroutineScope()
+        val navController = LocalNavController.current
 
         var playlists by remember { mutableStateOf<List<Playlist>>(emptyList()) }
         var isLoading by remember { mutableStateOf(true) }
@@ -241,7 +244,13 @@ object PlaylistsPage : Page {
                                     items(filteredPlaylists, key = { it.id }) { playlist ->
                                         PlaylistCard(
                                             playlist = playlist,
-                                            onClick = { selectedPlaylist = playlist }
+                                            onClick = {
+                                                if (navController != null) {
+                                                    navController.navigate(PlaylistDetailRoute(playlist.id))
+                                                } else {
+                                                    selectedPlaylist = playlist
+                                                }
+                                            }
                                         )
                                     }
                                 }
